@@ -1,0 +1,125 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  GO_VERSION: "1.24"
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+
+# Кеширование для ускорения сборки
+.go_cache: &go_cache
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-go"
+    paths:
+      - .go/pkg/mod/
+
+before_script:
+  - mkdir -p .go
+  - export GOPATH=$CI_PROJECT_DIR/.go
+
+# Стадия тестирования
+test:
+  stage: test
+  image: golang:${GO_VERSION}-alpine
+  <<: *go_cache
+  script:
+    - go mod download
+    - go fmt $(go list ./... | grep -v /vendor/)
+    - go vet $(go list ./... | grep -v /vendor/)
+    - go test -race -coverprofile=coverage.out -covermode=atomic ./...
+    - go tool cover -func=coverage.out
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.out
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Линтинг
+lint:
+  stage: test
+  image: golangci/golangci-lint:latest
+  <<: *go_cache
+  script:
+    - golangci-lint run -v
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Сборка приложения
+build:
+  stage: build
+  image: golang:${GO_VERSION}-alpine
+  <<: *go_cache
+  script:
+    - go mod download
+    - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./app/cmd/app
+  artifacts:
+    paths:
+      - main
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+# Сборка Docker образа
+docker-build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+    - tags
+
+# Деплой на staging
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - echo "Deploying to staging environment"
+    - echo "Application deployed successfully"
+  environment:
+    name: staging
+    url: https://staging.example.com
+  only:
+    - develop
+
+# Деплой на production
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - echo "Deploying to production environment"
+    - echo "Application deployed successfully"
+  environment:
+    name: production
+    url: https://production.example.com
+  when: manual
+  only:
+    - main
+    - tags
