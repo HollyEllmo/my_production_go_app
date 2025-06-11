@@ -17,6 +17,13 @@ type Config struct {
 		Port int `env:"PORT" env-default:"10000"`
 		SocketFile string `env:"SOCKET_FILE" env-default:"./app.sock"`
 	}
+	PostgreSQL struct {
+		Username string `env:"PSQL_USERNAME" env-required:"true"`
+		Password string `env:"PSQL_PASSWORD" env-required:"true"`
+		Host     string `env:"PSQL_HOST" env-required:"true"`
+		Port     string `env:"PSQL_PORT" env-required:"true"`
+		Database string `env:"PSQL_DATABASE" env-required:"true"`
+	 }
 	AppConfig struct {
 		LogLevel string `env:"LOG_LEVEL" env-default:"trace" env-description:"Log level for the application. Options: debug, info, warn, error, fatal"`
 		AdminUser struct {
@@ -35,11 +42,14 @@ func GetConfig() *Config {
 
 		instance = &Config{}
 
-		if err := cleanenv.ReadEnv(instance); err != nil {
-			helpText := "The Art of Development - Monolith Notes System"
-			help, _ := cleanenv.GetDescription(instance, &helpText)
-			log.Print(help)
-			log.Fatal(err)
+		if err := cleanenv.ReadConfig(".env", instance); err != nil {
+			// Если .env файл не найден, пробуем только переменные окружения
+			if err := cleanenv.ReadEnv(instance); err != nil {
+				helpText := "The Art of Development - Monolith Notes System"
+				help, _ := cleanenv.GetDescription(instance, &helpText)
+				log.Print(help)
+				log.Fatal(err)
+			}
 		}
 	})
 
