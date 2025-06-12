@@ -13,6 +13,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.8.1
+	golang.org/x/sync v0.15.0
 )
 
 require (

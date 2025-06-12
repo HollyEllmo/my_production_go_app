@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"path"
-	"path/filepath"
 	"time"
 
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
@@ -20,6 +17,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
@@ -46,13 +44,13 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 		config.PostgreSQL.Host, config.PostgreSQL.Port, config.PostgreSQL.Database,
 	)
 
-	pgClient, err := postgresql.NewClient(context.Background(), 5, time.Second*5, pgConfig)
+	pgClient, err := postgresql.NewClient(ctx, 5, time.Second*5, pgConfig)
 	if err != nil {
 		logging.GetLogger(ctx).Fatalln(err)
 	}
 
 	productStorage := storage.NewProductStorage(pgClient)
-	all, err := productStorage.All(context.Background())
+	all, err := productStorage.All(ctx)
 	if err != nil {
 		logging.GetLogger(ctx).Fatalln(err)
 	} else {
@@ -66,52 +64,53 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	}, nil
 }
 
-func (a *App) Run(ctx context.Context) {
-	a.StartHTTP(ctx)
+func (a *App) Run(ctx context.Context) error {
+	grp, ctx := errgroup.WithContext(ctx)
+
+	grp.Go(func() error {
+		return a.StartHTTP(ctx)
+	})
+	logging.GetLogger(ctx).Infoln("application initialized and started")
+	return grp.Wait()
 }
 
-
 func (a *App) StartHTTP(ctx context.Context) error {
-    logging.GetLogger(ctx).Infoln("start HTTP")
+    logging.GetLogger(ctx).WithFields(map[string]interface{}{
+		"IP":   a.cfg.HTTP.IP,
+		"Port": a.cfg.HTTP.Port,
+	}).Info("HTTP Server initializing")
 
-	var listener net.Listener
-
-	 if a.cfg.Listen.Type == config.LISTEN_TYPE_SOCK {
-		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			logging.GetLogger(ctx).Fatalln(err)
-		}
-		socketPath := path.Join(appDir, a.cfg.Listen.SocketFile)
-		logging.GetLogger(ctx).Infof("socket path: %s", socketPath)
-
-		logging.GetLogger(ctx).Infoln("create and listen unix socket")
-		listener, err = net.Listen("unix", socketPath)
-		if err != nil {
-			logging.GetLogger(ctx).Fatalln(err)
-		}
-	} else {
-		logging.GetLogger(ctx).Infof("bind application to host: %s and port: %d", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
-		var err error
-		listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.Listen.BindIP, a.cfg.Listen.Port))
-		if err != nil {
-			logging.GetLogger(ctx).Fatalln(err)
-		}
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.HTTP.IP, a.cfg.HTTP.Port))
+	if err != nil {
+		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
 	}
 
+	logging.GetLogger(ctx).WithFields(map[string]interface{}{
+		"AllowedMethods":     a.cfg.HTTP.CORS.AllowedMethods,
+		"AllowedOrigins":     a.cfg.HTTP.CORS.AllowedOrigins,
+		"AllowCredentials":   a.cfg.HTTP.CORS.AllowCredentials,
+		"AllowedHeaders":     a.cfg.HTTP.CORS.AllowedHeaders,
+		"OptionsPassthrough": a.cfg.HTTP.CORS.OptionsPassthrough,
+		"ExposedHeaders":     a.cfg.HTTP.CORS.ExposedHeaders,
+		"Debug":              a.cfg.HTTP.CORS.Debug,
+	}).Info("CORS configuration")
+
 	c := cors.New(cors.Options{
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"*"},
-		Debug:            a.cfg.IsDebug,
+		AllowedMethods:     a.cfg.HTTP.CORS.AllowedMethods,
+		AllowedOrigins:     a.cfg.HTTP.CORS.AllowedOrigins,
+		AllowCredentials:   a.cfg.HTTP.CORS.AllowCredentials,
+		AllowedHeaders:     a.cfg.HTTP.CORS.AllowedHeaders,
+		OptionsPassthrough: a.cfg.HTTP.CORS.OptionsPassthrough,
+		ExposedHeaders:     a.cfg.HTTP.CORS.ExposedHeaders,
+		Debug:              a.cfg.HTTP.CORS.Debug,
 	})
 
 	handler := c.Handler(a.router)
 
 	a.httpServer = &http.Server{
 		Handler: handler,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout: 15 * time.Second,
+		WriteTimeout: a.cfg.HTTP.WriteTimeout,
+		ReadTimeout: a.cfg.HTTP.ReadTimeout,
 	}
 
 	logging.GetLogger(ctx).Println("application completly initialized and started")
@@ -125,7 +124,7 @@ func (a *App) StartHTTP(ctx context.Context) error {
 		}
 	}
 
-	err := a.httpServer.Shutdown(context.Background())
+	err = a.httpServer.Shutdown(context.Background())
 	if err != nil {
 		logging.GetLogger(ctx).WithError(err).Fatalln("failed to shutdown server")
 	}
