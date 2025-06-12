@@ -13,7 +13,7 @@ build: clean $(APP_BIN)
 
 # Компиляция бинарного файла
 $(APP_BIN):
-	go build -o $(APP_BIN) ./app/cmd/app/main.go
+	cd app && go build -o build/app ./cmd/app/main.go
 
 # Очистка собранных файлов
 clean:
@@ -25,10 +25,10 @@ swagger:
 
 # Миграции базы данных
 migrate:
-	$(APP_BIN) migrate -version $(version)
+	cd app && $(APP_BIN) migrate -version $(version)
 
 migrate.down:
-	$(APP_BIN) migrate -seq down
+	cd app && ./build/app migrate -seq down
 
 migrate.up:
-	$(APP_BIN) migrate -seq up
+	cd app && ./build/app migrate -seq up

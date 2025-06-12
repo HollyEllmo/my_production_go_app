@@ -9,7 +9,7 @@ import (
 
 
 const (
-	URL = "/api/hearbeat"
+	URL = "/api/heartbeat"
 )
 
 type Handler struct {}

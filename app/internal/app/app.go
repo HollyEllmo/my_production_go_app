@@ -56,8 +56,9 @@ func NewApp(config *config.Config, logger logging.Logger) (App, error) {
 	all, err := productStorage.All(context.Background())
 	if err != nil {
 		logger.Error(err)
+	} else {
+		logger.Infof("Successfully connected to database, found %d products", len(all))
 	}
-   logger.Fatal(all)
 
 	return App{
 		cfg: config,
