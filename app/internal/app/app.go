@@ -24,21 +24,20 @@ import (
 
 type App struct {
 	cfg *config.Config
-	logger logging.Logger
 	router *httprouter.Router
 	httpServer *http.Server
 	pgClient postgresql.Client
 }
 
-func NewApp(config *config.Config, logger logging.Logger) (App, error) {
-	logger.Info("Initializing router...")
+func NewApp(ctx context.Context, config *config.Config) (App, error) {
+	logging.GetLogger(ctx).Println("Initializing router...")
 	router := httprouter.New()
 
-	logger.Info("swagger docs initializing")
+	logging.GetLogger(ctx).Println("swagger docs initializing")
 	router.Handler(http.MethodGet, "/swagger", http.RedirectHandler("/swagger/index.html", http.StatusMovedPermanently))
 	router.Handler(http.MethodGet, "/swagger/*any", httpSwagger.WrapHandler)
 
-	logger.Println("heartbeat metric initializing")
+	logging.GetLogger(ctx).Println("heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
 
@@ -49,54 +48,53 @@ func NewApp(config *config.Config, logger logging.Logger) (App, error) {
 
 	pgClient, err := postgresql.NewClient(context.Background(), 5, time.Second*5, pgConfig)
 	if err != nil {
-		logger.Fatal(err)
+		logging.GetLogger(ctx).Fatalln(err)
 	}
 
-	productStorage := storage.NewProductStorage(pgClient, &logger)
+	productStorage := storage.NewProductStorage(pgClient)
 	all, err := productStorage.All(context.Background())
 	if err != nil {
-		logger.Error(err)
+		logging.GetLogger(ctx).Fatalln(err)
 	} else {
-		logger.Infof("Successfully connected to database, found %d products", len(all))
+		logging.GetLogger(ctx).Infof("Successfully connected to database, found %d products", len(all))
 	}
 
 	return App{
 		cfg: config,
-		logger: logger,
 		router: router,
 		pgClient: pgClient,
 	}, nil
 }
 
-func (a *App) Run() {
-	a.StartHTTP()
+func (a *App) Run(ctx context.Context) {
+	a.StartHTTP(ctx)
 }
 
 
-func (a *App) StartHTTP() error {
-	a.logger.Info("start HTTP")
+func (a *App) StartHTTP(ctx context.Context) error {
+    logging.GetLogger(ctx).Infoln("start HTTP")
 
 	var listener net.Listener
 
 	 if a.cfg.Listen.Type == config.LISTEN_TYPE_SOCK {
 		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		if err != nil {
-			a.logger.Fatal(err)
+			logging.GetLogger(ctx).Fatalln(err)
 		}
 		socketPath := path.Join(appDir, a.cfg.Listen.SocketFile)
-		a.logger.Infof("socket path: %s", socketPath)
+		logging.GetLogger(ctx).Infof("socket path: %s", socketPath)
 
-		a.logger.Info("create and listen unix socket")
+		logging.GetLogger(ctx).Infoln("create and listen unix socket")
 		listener, err = net.Listen("unix", socketPath)
 		if err != nil {
-			a.logger.Fatal(err)
+			logging.GetLogger(ctx).Fatalln(err)
 		}
 	} else {
-		a.logger.Infof("bind application to host: %s and port: %d", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
+		logging.GetLogger(ctx).Infof("bind application to host: %s and port: %d", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
 		var err error
 		listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.Listen.BindIP, a.cfg.Listen.Port))
 		if err != nil {
-			a.logger.Fatal(err)
+			logging.GetLogger(ctx).Fatalln(err)
 		}
 	}
 
@@ -116,20 +114,20 @@ func (a *App) StartHTTP() error {
 		ReadTimeout: 15 * time.Second,
 	}
 
-	a.logger.Print("application completly initialized and started")
+	logging.GetLogger(ctx).Println("application completly initialized and started")
 
 	if err := a.httpServer.Serve(listener); err != nil {
 		switch {
 		case errors.Is(err, http.ErrServerClosed):
-			a.logger.Warning("server shutdown")
+			logging.GetLogger(ctx).Warnln("server shutdown")
 		default:
-			a.logger.WithError(err).Fatal("failed to start server")
+			logging.GetLogger(ctx).WithError(err).Fatalln("failed to start server")
 		}
 	}
 
 	err := a.httpServer.Shutdown(context.Background())
 	if err != nil {
-		a.logger.WithError(err).Fatal("failed to shutdown server")
+		logging.GetLogger(ctx).WithError(err).Fatalln("failed to shutdown server")
 	}
 
 	return err

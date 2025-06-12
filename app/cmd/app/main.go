@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"context"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/app"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
@@ -9,19 +9,23 @@ import (
 )
 
 func main() {
-	log.Print("config initializing")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logger := logging.GetLogger(ctx)
+
+	logger.Println("config initializing")
 	cfg := config.GetConfig()
 
-	log.Print("logger initializing")
 
-	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
+   
+	ctx = logging.ContextWithLogger(ctx, logger)
 
-	a, err := app.NewApp(cfg, logger)
+	a, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		logger.Error(err)
-		return
+		logging.GetLogger(ctx).Fatalln(err)
 	}
 
-	logger.Println("Running Application")
-	a.Run()
+	logger.Infoln("Running Application")
+	a.Run(ctx)
 }
