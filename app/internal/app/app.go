@@ -77,19 +77,21 @@ func (a *App) Run(ctx context.Context) error {
 	return grp.Wait()
 }
 
-func (a *App) startGRPC(ctx context.Context) error {
+func (a *App) StartGRPC(ctx context.Context) error {
 	logging.GetLogger(ctx).WithFields(map[string]interface{}{
 		"IP":   a.cfg.GRPC.IP,
 		"Port": a.cfg.GRPC.Port,
 	})
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
-	if err != nil {
-		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
-	}
+	// listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
+	// if err != nil {
+	// 	logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
+	// }
 
 	serverOptions := []grpc.ServerOption{}
 	a.grpcServer = grpc.NewServer(serverOptions...)
+
+	return nil
 }
 
 func (a *App) StartHTTP(ctx context.Context) error {
