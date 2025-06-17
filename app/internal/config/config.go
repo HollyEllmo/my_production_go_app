@@ -28,7 +28,11 @@ type Config struct {
 			ExposedHeaders     []string `yaml:"exposed_headers"`
 			Debug              bool     `yaml:"debug"`
 		} `yaml:"cors"`
-	} 
+	}
+	GRPC struct {
+		IP   string `yaml:"ip" env:"GRPC-IP"`
+		Port int    `yaml:"port" env:"GRPC-PORT"`
+	} `yaml:"grpc"`
 	AppConfig struct {
 		LogLevel string `env:"LOG_LEVEL" env-default:"trace" env-description:"Log level for the application. Options: debug, info, warn, error, fatal"`
 		AdminUser struct {

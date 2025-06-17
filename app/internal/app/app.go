@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"google.golang.org/grpc"
+
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
@@ -24,6 +26,7 @@ type App struct {
 	cfg *config.Config
 	router *httprouter.Router
 	httpServer *http.Server
+	grpcServer *grpc.Server
 	pgClient postgresql.Client
 }
 
@@ -74,11 +77,26 @@ func (a *App) Run(ctx context.Context) error {
 	return grp.Wait()
 }
 
+func (a *App) startGRPC(ctx context.Context) error {
+	logging.GetLogger(ctx).WithFields(map[string]interface{}{
+		"IP":   a.cfg.GRPC.IP,
+		"Port": a.cfg.GRPC.Port,
+	})
+
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
+	if err != nil {
+		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
+	}
+
+	serverOptions := []grpc.ServerOption{}
+	a.grpcServer = grpc.NewServer(serverOptions...)
+}
+
 func (a *App) StartHTTP(ctx context.Context) error {
     logging.GetLogger(ctx).WithFields(map[string]interface{}{
 		"IP":   a.cfg.HTTP.IP,
 		"Port": a.cfg.HTTP.Port,
-	}).Info("HTTP Server initializing")
+	})
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.HTTP.IP, a.cfg.HTTP.Port))
 	if err != nil {
