@@ -10,7 +10,7 @@ app:
 
 postgresql:
   host: ps-psql
-  port: "5432"
+  port: "5434"
   username: postgres
   password: postgres
   database: prodservice
