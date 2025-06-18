@@ -18,7 +18,7 @@ import (
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
-	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
+	pb_prod_products "github.com/HollyEllmo/my_proto_repo/gen/go/prod_service/products/v1"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"

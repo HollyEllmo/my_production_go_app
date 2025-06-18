@@ -1,6 +1,6 @@
 package product
 
-import pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
+import pb_prod_products "github.com/HollyEllmo/my_proto_repo/gen/go/prod_service/products/v1"
 
 type CreateProductDTO struct {
 	Name          string 
@@ -17,7 +17,7 @@ func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *
    return &CreateProductDTO{
 		Name:          product.GetName(),
 		Description:   product.GetDescription(),
-		ImageID:       product.ImageId,
+		ImageID:       product.GetImageId(),
 		Price:         product.GetPrice(),
 		CurrencyID:    product.GetCurrencyId(),
 		Rating:        product.GetRating(),

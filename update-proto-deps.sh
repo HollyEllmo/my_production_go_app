@@ -25,8 +25,8 @@ echo "🏷️  Новая версия: $PSEUDO_VERSION"
 GO_MOD_FILE="./app/go.mod"
 
 # Обновляем версии в go.mod
-sed -i '' "s/github.com\/HollyEllmo\/my-proto-repo\/gen\/go\/prod_service v[0-9].*$/github.com\/HollyEllmo\/my-proto-repo\/gen\/go\/prod_service $PSEUDO_VERSION/" "$GO_MOD_FILE"
-sed -i '' "s/github.com\/HollyEllmo\/my-proto-repo\/gen\/go\/filter v[0-9].*$/github.com\/HollyEllmo\/my-proto-repo\/gen\/go\/filter $PSEUDO_VERSION/" "$GO_MOD_FILE"
+sed -i '' "s/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/prod_service v[0-9].*$/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/prod_service $PSEUDO_VERSION/" "$GO_MOD_FILE"
+sed -i '' "s/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/filter v[0-9].*$/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/filter $PSEUDO_VERSION/" "$GO_MOD_FILE"
 
 # Обновляем replace директивы
 sed -i '' "s/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/prod_service v[0-9].*$/github.com\/HollyEllmo\/my_proto_repo\/gen\/go\/prod_service $PSEUDO_VERSION/" "$GO_MOD_FILE"
