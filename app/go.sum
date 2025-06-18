@@ -1,6 +1,10 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618070144-d25e3c474bb3 h1:5n5yux3X5+tkcLcVTlDnK28GDXqxGODTwc+QaGCcK5s=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618070144-d25e3c474bb3/go.mod h1:dqQfEE6354rpbHUH6ksLYS4nFYT2OIES+xxbiLzZ320=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618070144-d25e3c474bb3 h1:vhYTHKF+Irnmmf8p+6m0MJJP+oGhEihE5zPDbMCD+ho=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618070144-d25e3c474bb3/go.mod h1:SjJu/fixz1PMxibykiJ1ri9uwGFnQF0JY8kCCAomuF8=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
