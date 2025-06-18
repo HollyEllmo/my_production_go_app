@@ -13,7 +13,7 @@ type repository interface {
 	Create(ctx context.Context, dto storage.CreateProductDTO) (storage.Product, error)
 }
 
-type Service struct{
+type Service struct {
 	repository repository
 }
 

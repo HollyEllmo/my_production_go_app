@@ -3,13 +3,16 @@ module github.com/HollyEllmo/my-first-go-project
 go 1.24.2
 
 require (
-	github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618124425-5aea0023ab1f
+	github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618132444-5931a03f78e4
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lib/pq v1.10.9
+	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/swaggo/http-swagger v1.3.4
@@ -19,6 +22,7 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/HollyEllmo/my-proto-repo/gen/go/filter v0.0.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
@@ -43,7 +47,7 @@ require (
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822 // indirect
@@ -54,4 +58,6 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618124425-5aea0023ab1f
+replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618132444-5931a03f78e4
+
+replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618132444-5931a03f78e4
