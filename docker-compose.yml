@@ -43,6 +43,29 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: my-production-service-app-dev
+    ports:
+      - "30000:30000" # gRPC порт
+      - "30001:30001" # HTTP порт
+    environment:
+      - CONFIG_PATH=/app/configs/config.local.yaml
+      - GO_ENV=development
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./app:/src/app:ro
+    networks:
+      - app-network
+    depends_on:
+      ps-psql:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - dev
+
 volumes:
   postgres_data:
     driver: local
