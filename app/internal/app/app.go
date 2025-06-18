@@ -9,13 +9,16 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
+	"github.com/HollyEllmo/my-first-go-project/internal/controller/grpc/v1/product"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
+	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -28,6 +31,8 @@ type App struct {
 	httpServer *http.Server
 	grpcServer *grpc.Server
 	pgClient postgresql.Client
+
+	productServiceServer pb_prod_products.ProductServiceServer
 }
 
 func NewApp(ctx context.Context, config *config.Config) (App, error) {
@@ -60,10 +65,15 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 		logging.GetLogger(ctx).Infof("Successfully connected to database, found %d products", len(all))
 	}
 
+	productServiceServer := product.NewServer(
+		pb_prod_products.UnimplementedProductServiceServer{},
+	)
+
 	return App{
 		cfg: config,
 		router: router,
 		pgClient: pgClient,
+		productServiceServer: productServiceServer,
 	}, nil
 }
 
@@ -73,25 +83,32 @@ func (a *App) Run(ctx context.Context) error {
 	grp.Go(func() error {
 		return a.StartHTTP(ctx)
 	})
+	grp.Go(func() error {
+		return a.StartGRPC(ctx, a.productServiceServer)
+	})
 	logging.GetLogger(ctx).Infoln("application initialized and started")
 	return grp.Wait()
 }
 
-func (a *App) StartGRPC(ctx context.Context) error {
+func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServiceServer) error {
 	logging.GetLogger(ctx).WithFields(map[string]interface{}{
 		"IP":   a.cfg.GRPC.IP,
 		"Port": a.cfg.GRPC.Port,
 	})
 
-	// listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
-	// if err != nil {
-	// 	logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
-	// }
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
+	if err != nil {
+		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
+	}
 
 	serverOptions := []grpc.ServerOption{}
 	a.grpcServer = grpc.NewServer(serverOptions...)
 
-	return nil
+	pb_prod_products.RegisterProductServiceServer(a.grpcServer, server)
+
+	reflection.Register(a.grpcServer)
+
+	return a.grpcServer.Serve(listener)
 }
 
 func (a *App) StartHTTP(ctx context.Context) error {
