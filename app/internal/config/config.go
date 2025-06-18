@@ -75,6 +75,12 @@ func GetConfig() *Config {
 
 		instance = &Config{}
 
+		// Сначала читаем YAML файл
+		if err := cleanenv.ReadConfig(configPath, instance); err != nil {
+			log.Printf("Error reading config file %s: %v", configPath, err)
+		}
+
+		// Затем читаем .env файл (если есть)
 		if err := cleanenv.ReadConfig(".env", instance); err != nil {
 			// Если .env файл не найден, пробуем только переменные окружения
 			if err := cleanenv.ReadEnv(instance); err != nil {
