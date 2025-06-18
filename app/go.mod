@@ -3,7 +3,7 @@ module github.com/HollyEllmo/my-first-go-project
 go 1.24.2
 
 require (
-	github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618122152-4de41dd63000
+	github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618124425-5aea0023ab1f
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgconn v1.14.3
@@ -54,4 +54,4 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618122152-4de41dd63000
+replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618124425-5aea0023ab1f

@@ -1,10 +1,10 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618122152-4de41dd63000 h1:X6RHwz0ndvXQ6y6SFyNGjDsmJeMRqg1nicIkAZAAlms=
-github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618122152-4de41dd63000/go.mod h1:nRyacOIieKffas3CvFMnbdIabquJeNuL73p+ZO0fGVI=
-github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618122152-4de41dd63000 h1:D0IBXFnqWRKrXZnxYCeWeP31O4f0FGWjd6kgXaVYYPE=
-github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618122152-4de41dd63000/go.mod h1:tzNV5F6Bl/i4RugVUGDEpUE4eXyT/20R84SoGTyH4tg=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618124425-5aea0023ab1f h1:RxrXuPGVWcFOVPNRZcu+7uuQzr7bfjMuTsvLIv+G9xA=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618124425-5aea0023ab1f/go.mod h1:nRyacOIieKffas3CvFMnbdIabquJeNuL73p+ZO0fGVI=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618124425-5aea0023ab1f h1:QhPVbxl3lGH99kQKgLKFxFoh5n2m81gA7hGzJNO/ZPY=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618124425-5aea0023ab1f/go.mod h1:tzNV5F6Bl/i4RugVUGDEpUE4eXyT/20R84SoGTyH4tg=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
