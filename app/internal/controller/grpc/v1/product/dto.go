@@ -1,6 +1,6 @@
 package product
 
-import pb_prod_products "github.com/HollyEllmo/my_proto_repo/gen/go/prod_service/products/v1"
+import pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 
 type CreateProductDTO struct {
 	Name          string 
