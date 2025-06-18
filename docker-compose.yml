@@ -1,13 +1,13 @@
 version: "3.8"
 
 services:
-  postgres:
+  ps-psql:
     image: postgres:15-alpine
-    container_name: my-production-service-db
+    container_name: ps-psql
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: myproductiondb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prodservice
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5434:5432"
@@ -17,12 +17,54 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d myproductiondb"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prodservice"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-production-service-app
+    ports:
+      - "30000:30000" # gRPC порт
+      - "30001:30001" # HTTP порт
+    environment:
+      - CONFIG_PATH=/app/configs/config.local.yaml
+    volumes:
+      - ./configs:/app/configs:ro
+    networks:
+      - app-network
+    depends_on:
+      ps-psql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: my-production-service-app-dev
+    ports:
+      - "30000:30000" # gRPC порт
+      - "30001:30001" # HTTP порт
+    environment:
+      - CONFIG_PATH=/app/configs/config.local.yaml
+      - GO_ENV=development
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./app:/src/app:ro
+    networks:
+      - app-network
+    depends_on:
+      ps-psql:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - dev
 
 volumes:
   postgres_data:

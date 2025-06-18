@@ -1,0 +1,32 @@
+# Development Dockerfile with hot reload
+FROM golang:1.24-alpine AS dev
+
+# Install air for live reloading
+RUN go install github.com/air-verse/air@latest
+
+# Install git for go mod download
+RUN apk add --no-cache git
+
+WORKDIR /src
+
+# Copy go mod files
+COPY app/go.mod app/go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Create air config
+RUN echo '[build]' > .air.toml && \
+    echo '  cmd = "go build -o ./tmp/main ./cmd/app"' >> .air.toml && \
+    echo '  bin = "./tmp/main"' >> .air.toml && \
+    echo '  include_ext = ["go", "yaml"]' >> .air.toml && \
+    echo '  exclude_dir = ["tmp", "docs"]' >> .air.toml && \
+    echo '  log = "air.log"' >> .air.toml && \
+    echo '[log]' >> .air.toml && \
+    echo '  time = true' >> .air.toml
+
+# Expose ports
+EXPOSE 30000 30001
+
+# Use air for hot reloading
+CMD ["air"]

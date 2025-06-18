@@ -6,39 +6,44 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"path"
-	"path/filepath"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
+	"github.com/HollyEllmo/my-first-go-project/internal/controller/grpc/v1/product"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
+	pb_prod_products "github.com/HollyEllmo/my_proto_repo/gen/go/prod_service/products/v1"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
 	cfg *config.Config
-	logger logging.Logger
 	router *httprouter.Router
 	httpServer *http.Server
+	grpcServer *grpc.Server
 	pgClient postgresql.Client
+
+	productServiceServer pb_prod_products.ProductServiceServer
 }
 
-func NewApp(config *config.Config, logger logging.Logger) (App, error) {
-	logger.Info("Initializing router...")
+func NewApp(ctx context.Context, config *config.Config) (App, error) {
+	logging.GetLogger(ctx).Println("Initializing router...")
 	router := httprouter.New()
 
-	logger.Info("swagger docs initializing")
+	logging.GetLogger(ctx).Println("swagger docs initializing")
 	router.Handler(http.MethodGet, "/swagger", http.RedirectHandler("/swagger/index.html", http.StatusMovedPermanently))
 	router.Handler(http.MethodGet, "/swagger/*any", httpSwagger.WrapHandler)
 
-	logger.Println("heartbeat metric initializing")
+	logging.GetLogger(ctx).Println("heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
 
@@ -47,89 +52,121 @@ func NewApp(config *config.Config, logger logging.Logger) (App, error) {
 		config.PostgreSQL.Host, config.PostgreSQL.Port, config.PostgreSQL.Database,
 	)
 
-	pgClient, err := postgresql.NewClient(context.Background(), 5, time.Second*5, pgConfig)
+	pgClient, err := postgresql.NewClient(ctx, 5, time.Second*5, pgConfig)
 	if err != nil {
-		logger.Fatal(err)
+		logging.GetLogger(ctx).Fatalln(err)
 	}
 
-	productStorage := storage.NewProductStorage(pgClient, &logger)
-	all, err := productStorage.All(context.Background())
+	productStorage := storage.NewProductStorage(pgClient)
+	all, err := productStorage.All(ctx)
 	if err != nil {
-		logger.Error(err)
+		logging.GetLogger(ctx).Fatalln(err)
 	} else {
-		logger.Infof("Successfully connected to database, found %d products", len(all))
+		logging.GetLogger(ctx).Infof("Successfully connected to database, found %d products", len(all))
 	}
+
+	productServiceServer := product.NewServer(
+		pb_prod_products.UnimplementedProductServiceServer{},
+	)
 
 	return App{
 		cfg: config,
-		logger: logger,
 		router: router,
 		pgClient: pgClient,
+		productServiceServer: productServiceServer,
 	}, nil
 }
 
-func (a *App) Run() {
-	a.StartHTTP()
+func (a *App) Run(ctx context.Context) error {
+	grp, ctx := errgroup.WithContext(ctx)
+
+	grp.Go(func() error {
+		return a.StartHTTP(ctx)
+	})
+	grp.Go(func() error {
+		return a.StartGRPC(ctx, a.productServiceServer)
+	})
+	return grp.Wait()
 }
 
+func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServiceServer) error {
+	logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
+		"IP":   a.cfg.GRPC.IP,
+		"Port": a.cfg.GRPC.Port,
+	})
 
-func (a *App) StartHTTP() error {
-	a.logger.Info("start HTTP")
+	logger.Println("gRPC server initializing")
 
-	var listener net.Listener
-
-	 if a.cfg.Listen.Type == config.LISTEN_TYPE_SOCK {
-		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			a.logger.Fatal(err)
-		}
-		socketPath := path.Join(appDir, a.cfg.Listen.SocketFile)
-		a.logger.Infof("socket path: %s", socketPath)
-
-		a.logger.Info("create and listen unix socket")
-		listener, err = net.Listen("unix", socketPath)
-		if err != nil {
-			a.logger.Fatal(err)
-		}
-	} else {
-		a.logger.Infof("bind application to host: %s and port: %d", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
-		var err error
-		listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.Listen.BindIP, a.cfg.Listen.Port))
-		if err != nil {
-			a.logger.Fatal(err)
-		}
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
+	if err != nil {
+		logger.WithError(err).Fatalln("failed to listen on port")
 	}
 
+	serverOptions := []grpc.ServerOption{}
+	a.grpcServer = grpc.NewServer(serverOptions...)
+
+	pb_prod_products.RegisterProductServiceServer(a.grpcServer, server)
+
+	reflection.Register(a.grpcServer)
+
+	return a.grpcServer.Serve(listener)
+}
+
+func (a *App) StartHTTP(ctx context.Context) error {
+    logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
+		"IP":   a.cfg.HTTP.IP,
+		"Port": a.cfg.HTTP.Port,
+	})
+
+	logger.Println("HTTP server initializing")
+
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.HTTP.IP, a.cfg.HTTP.Port))
+	if err != nil {
+		logger.WithError(err).Fatalln("failed to listen on port")
+	}
+
+	logger.WithFields(map[string]interface{}{
+		"AllowedMethods":     a.cfg.HTTP.CORS.AllowedMethods,
+		"AllowedOrigins":     a.cfg.HTTP.CORS.AllowedOrigins,
+		"AllowCredentials":   a.cfg.HTTP.CORS.AllowCredentials,
+		"AllowedHeaders":     a.cfg.HTTP.CORS.AllowedHeaders,
+		"OptionsPassthrough": a.cfg.HTTP.CORS.OptionsPassthrough,
+		"ExposedHeaders":     a.cfg.HTTP.CORS.ExposedHeaders,
+		"Debug":              a.cfg.HTTP.CORS.Debug,
+	}).Info("CORS configuration")
+
 	c := cors.New(cors.Options{
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"*"},
-		Debug:            a.cfg.IsDebug,
+		AllowedMethods:     a.cfg.HTTP.CORS.AllowedMethods,
+		AllowedOrigins:     a.cfg.HTTP.CORS.AllowedOrigins,
+		AllowCredentials:   a.cfg.HTTP.CORS.AllowCredentials,
+		AllowedHeaders:     a.cfg.HTTP.CORS.AllowedHeaders,
+		OptionsPassthrough: a.cfg.HTTP.CORS.OptionsPassthrough,
+		ExposedHeaders:     a.cfg.HTTP.CORS.ExposedHeaders,
+		Debug:              a.cfg.HTTP.CORS.Debug,
 	})
 
 	handler := c.Handler(a.router)
 
 	a.httpServer = &http.Server{
 		Handler: handler,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout: 15 * time.Second,
+		WriteTimeout: a.cfg.HTTP.WriteTimeout,
+		ReadTimeout: a.cfg.HTTP.ReadTimeout,
 	}
 
-	a.logger.Print("application completly initialized and started")
+	logger.Println("application completly initialized and started")
 
 	if err := a.httpServer.Serve(listener); err != nil {
 		switch {
 		case errors.Is(err, http.ErrServerClosed):
-			a.logger.Warning("server shutdown")
+			logger.Warnln("server shutdown")
 		default:
-			a.logger.WithError(err).Fatal("failed to start server")
+			logger.WithError(err).Fatalln("failed to start server")
 		}
 	}
 
-	err := a.httpServer.Shutdown(context.Background())
+	err = a.httpServer.Shutdown(context.Background())
 	if err != nil {
-		a.logger.WithError(err).Fatal("failed to shutdown server")
+		logger.WithError(err).Fatalln("failed to shutdown server")
 	}
 
 	return err
