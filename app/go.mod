@@ -54,7 +54,6 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-// Используем конкретные коммиты из main ветки для получения последних изменений
 replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618070144-d25e3c474bb3
 
 replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618070144-d25e3c474bb3

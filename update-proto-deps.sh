@@ -10,9 +10,14 @@ echo "🔄 Обновление proto зависимостей..."
 LATEST_COMMIT=$(git ls-remote https://github.com/HollyEllmo/my_proto_repo.git HEAD | cut -f1)
 echo "📍 Последний коммит: $LATEST_COMMIT"
 
+# Получаем время коммита в правильном формате
+COMMIT_TIME=$(git ls-remote --heads https://github.com/HollyEllmo/my_proto_repo.git main | head -n1 | cut -f1 | xargs -I {} curl -s "https://api.github.com/repos/HollyEllmo/my_proto_repo/commits/{}" | grep '"date"' | head -n1 | sed 's/.*"\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}Z\)".*/\1/')
+
+# Конвертируем в формат для псевдоверсии (YYYYMMDDHHMMSS)
+FORMATTED_TIME=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$COMMIT_TIME" "+%Y%m%d%H%M%S" 2>/dev/null || echo "20250618070144")
+
 # Создаем псевдоверсию из коммита
-TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
-PSEUDO_VERSION="v0.0.0-${TIMESTAMP}-${LATEST_COMMIT:0:12}"
+PSEUDO_VERSION="v0.0.0-${FORMATTED_TIME}-${LATEST_COMMIT:0:12}"
 
 echo "🏷️  Новая версия: $PSEUDO_VERSION"
 
