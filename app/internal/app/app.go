@@ -86,19 +86,20 @@ func (a *App) Run(ctx context.Context) error {
 	grp.Go(func() error {
 		return a.StartGRPC(ctx, a.productServiceServer)
 	})
-	logging.GetLogger(ctx).Infoln("application initialized and started")
 	return grp.Wait()
 }
 
 func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServiceServer) error {
-	logging.GetLogger(ctx).WithFields(map[string]interface{}{
+	logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
 		"IP":   a.cfg.GRPC.IP,
 		"Port": a.cfg.GRPC.Port,
 	})
 
+	logger.Println("gRPC server initializing")
+
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.IP, a.cfg.GRPC.Port))
 	if err != nil {
-		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
+		logger.WithError(err).Fatalln("failed to listen on port")
 	}
 
 	serverOptions := []grpc.ServerOption{}
@@ -112,17 +113,19 @@ func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServ
 }
 
 func (a *App) StartHTTP(ctx context.Context) error {
-    logging.GetLogger(ctx).WithFields(map[string]interface{}{
+    logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
 		"IP":   a.cfg.HTTP.IP,
 		"Port": a.cfg.HTTP.Port,
 	})
 
+	logger.Println("HTTP server initializing")
+
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.HTTP.IP, a.cfg.HTTP.Port))
 	if err != nil {
-		logging.GetLogger(ctx).WithError(err).Fatalln("failed to listen on port")
+		logger.WithError(err).Fatalln("failed to listen on port")
 	}
 
-	logging.GetLogger(ctx).WithFields(map[string]interface{}{
+	logger.WithFields(map[string]interface{}{
 		"AllowedMethods":     a.cfg.HTTP.CORS.AllowedMethods,
 		"AllowedOrigins":     a.cfg.HTTP.CORS.AllowedOrigins,
 		"AllowCredentials":   a.cfg.HTTP.CORS.AllowCredentials,
@@ -150,20 +153,20 @@ func (a *App) StartHTTP(ctx context.Context) error {
 		ReadTimeout: a.cfg.HTTP.ReadTimeout,
 	}
 
-	logging.GetLogger(ctx).Println("application completly initialized and started")
+	logger.Println("application completly initialized and started")
 
 	if err := a.httpServer.Serve(listener); err != nil {
 		switch {
 		case errors.Is(err, http.ErrServerClosed):
-			logging.GetLogger(ctx).Warnln("server shutdown")
+			logger.Warnln("server shutdown")
 		default:
-			logging.GetLogger(ctx).WithError(err).Fatalln("failed to start server")
+			logger.WithError(err).Fatalln("failed to start server")
 		}
 	}
 
 	err = a.httpServer.Shutdown(context.Background())
 	if err != nil {
-		logging.GetLogger(ctx).WithError(err).Fatalln("failed to shutdown server")
+		logger.WithError(err).Fatalln("failed to shutdown server")
 	}
 
 	return err
