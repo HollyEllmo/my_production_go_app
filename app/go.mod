@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/HollyEllmo/my-proto-repo/gen/go/filter v0.0.0
-	github.com/HollyEllmo/my-proto-repo/gen/go/prod_service v0.0.0-20250618132444-5931a03f78e4
+	github.com/HollyEllmo/my-proto-repo/gen/go/prod_service v0.0.0-20250619092020-52c6c1eb3d32
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -58,6 +58,6 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250618132444-5931a03f78e4
+replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250619092020-52c6c1eb3d32
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250618132444-5931a03f78e4
+replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250619092020-52c6c1eb3d32

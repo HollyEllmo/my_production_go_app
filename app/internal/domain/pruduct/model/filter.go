@@ -67,6 +67,8 @@ func ProductsFilter(req *pb_prod_products.AllProductsRequest) filter.Filterable 
 		operator := types.IntOperatorFromPB(categoryId.GetOp())
 		addFilterField(categoryIDFilterField, categoryId.GetVal(), operator, options)
 	}
+
+	return options
 }
 
 func addFilterField(name, value string, 
