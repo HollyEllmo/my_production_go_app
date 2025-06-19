@@ -12,6 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var defLogger = NewLogger() 
+
 type logger struct {
 	*logrus.Logger
 }
@@ -45,8 +47,12 @@ type Logger interface {
 	Panicln(args ...interface{})
 }
 
-func GetLogger(ctx context.Context) Logger {
-	return loggerFromContext(ctx)
+// func GetLogger(ctx context.Context) Logger {
+// 	return loggerFromContext(ctx)
+// }
+
+func GetLogger() Logger {
+	return defLogger
 }
 
 // CallerHook это хук для исправления caller'а в логах
@@ -111,123 +117,123 @@ func NewLogger() Logger {
 }
 
 // SetLevel sets the logging level
-func (l *logger) SetLevel(level logrus.Level) {
-	l.Logger.SetLevel(level)
+func SetLevel(level logrus.Level) {
+	defLogger.SetLevel(level)
 }
 
 // GetLevel returns the current logging level
-func (l *logger) GetLevel() logrus.Level {
-	return l.Logger.GetLevel()
+func GetLevel() logrus.Level {
+	return defLogger.GetLevel()
 }
 
 // WithField adds a field to the logger
-func (l *logger) WithField(key string, value interface{}) *logrus.Entry {
-	return l.Logger.WithField(key, value)
+func WithField(ctx context.Context, key string, value interface{}) *logrus.Entry {
+	return LoggerFromContext(ctx).WithField(key, value)
 }
 
 // WithFields adds multiple fields to the logger
-func (l *logger) WithFields(fields logrus.Fields) *logrus.Entry {
-	return l.Logger.WithFields(fields)
+func WithFields(ctx context.Context, fields logrus.Fields) *logrus.Entry {
+	return LoggerFromContext(ctx).WithFields(fields)
 }
 
 // WithError adds an error to the logger
-func (l *logger) WithError(err error) *logrus.Entry {
-	return l.Logger.WithError(err)
+func WithError(ctx context.Context, err error) *logrus.Entry {
+	return LoggerFromContext(ctx).WithError(err)
 }
 
 // WithContext adds context to the logger
-func (l *logger) WithContext(ctx context.Context) *logrus.Entry {
-	return l.Logger.WithContext(ctx)
+func WithContext(ctx context.Context) *logrus.Entry {
+	return LoggerFromContext(ctx).WithContext(ctx)
 }
 
 // WithTime adds time to the logger
-func (l *logger) WithTime(t time.Time) *logrus.Entry {
-	return l.Logger.WithTime(t)
+func WithTime(ctx context.Context, t time.Time) *logrus.Entry {
+	return LoggerFromContext(ctx).WithTime(t)
 }
 
 // Tracef logs a formatted trace message
-func (l *logger) Tracef(format string, args ...interface{}) {
-	l.Logger.Tracef(format, args...)
+func Tracef(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Tracef(format, args...)
 }
 
 // Debugf logs a formatted debug message
-func (l *logger) Debugf(format string, args ...interface{}) {
-	l.Logger.Debugf(format, args...)
+func Debugf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Debugf(format, args...)
 }
 
 // Infof logs a formatted info message
-func (l *logger) Infof(format string, args ...interface{}) {
-	l.Logger.Infof(format, args...)
+func Infof(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Infof(format, args...)
 }
 
 // Printf logs a formatted message
-func (l *logger) Printf(format string, args ...interface{}) {
-	l.Logger.Printf(format, args...)
+func Printf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Printf(format, args...)
 }
 
 // Warnf logs a formatted warning message
-func (l *logger) Warnf(format string, args ...interface{}) {
-	l.Logger.Warnf(format, args...)
+func Warnf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Warnf(format, args...)
 }
 
 // Warningf logs a formatted warning message
-func (l *logger) Warningf(format string, args ...interface{}) {
-	l.Logger.Warningf(format, args...)
+func Warningf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Warningf(format, args...)
 }
 
 // Errorf logs a formatted error message
-func (l *logger) Errorf(format string, args ...interface{}) {
-	l.Logger.Errorf(format, args...)
+func Errorf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Errorf(format, args...)
 }
 
 // Fatalf logs a formatted fatal message and exits
-func (l *logger) Fatalf(format string, args ...interface{}) {
-	l.Logger.Fatalf(format, args...)
+func Fatalf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Fatalf(format, args...)
 }
 
 // Panicf logs a formatted panic message and panics
-func (l *logger) Panicf(format string, args ...interface{}) {
-	l.Logger.Panicf(format, args...)
+func Panicf(ctx context.Context, format string, args ...interface{}) {
+	LoggerFromContext(ctx).Panicf(format, args...)
 }
 
 // Traceln logs a trace message with newline
-func (l *logger) Traceln(args ...interface{}) {
-	l.Logger.Traceln(args...)
+func Traceln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Traceln(args...)
 }
 
 // Debugln logs a debug message with newline
-func (l *logger) Debugln(args ...interface{}) {
-	l.Logger.Debugln(args...)
+func Debugln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Debugln(args...)
 }
 
 // Infoln logs an info message with newline
-func (l *logger) Infoln(args ...interface{}) {
-	l.Logger.Infoln(args...)
+func Infoln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Infoln(args...)
 }
 
 // Println logs a message with newline
-func (l *logger) Println(args ...interface{}) {
-	l.Logger.Println(args...)
+func Println(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Println(args...)
 }
 
 // Warnln logs a warning message with newline
-func (l *logger) Warnln(args ...interface{}) {
-	l.Logger.Warnln(args...)
+func Warnln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Warnln(args...)
 }
 
 // Errorln logs an error message with newline
-func (l *logger) Errorln(args ...interface{}) {
-	l.Logger.Errorln(args...)
+func Errorln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Errorln(args...)
 }
 
 // Fatalln logs a fatal message with newline and exits
-func (l *logger) Fatalln(args ...interface{}) {
-	l.Logger.Fatalln(args...)
+func Fatalln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Fatalln(args...)
 }
 
 // Panicln logs a panic message with newline and panics
-func (l *logger) Panicln(args ...interface{}) {
-	l.Logger.Panicln(args...)
+func Panicln(ctx context.Context, args ...interface{}) {
+	LoggerFromContext(ctx).Panicln(args...)
 }
 
 

@@ -36,14 +36,14 @@ type App struct {
 }
 
 func NewApp(ctx context.Context, config *config.Config) (App, error) {
-	logging.GetLogger(ctx).Println("Initializing router...")
+	logging.GetLogger().Println("Initializing router...")
 	router := httprouter.New()
 
-	logging.GetLogger(ctx).Println("swagger docs initializing")
+	logging.GetLogger().Println("swagger docs initializing")
 	router.Handler(http.MethodGet, "/swagger", http.RedirectHandler("/swagger/index.html", http.StatusMovedPermanently))
 	router.Handler(http.MethodGet, "/swagger/*any", httpSwagger.WrapHandler)
 
-	logging.GetLogger(ctx).Println("heartbeat metric initializing")
+	logging.GetLogger().Println("heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
 
@@ -54,15 +54,15 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 
 	pgClient, err := postgresql.NewClient(ctx, 5, time.Second*5, pgConfig)
 	if err != nil {
-		logging.GetLogger(ctx).Fatalln(err)
+		logging.GetLogger().Fatalln(err)
 	}
 
 	productStorage := storage.NewProductStorage(pgClient)
 	all, err := productStorage.All(ctx)
 	if err != nil {
-		logging.GetLogger(ctx).Fatalln(err)
+		logging.GetLogger().Fatalln(err)
 	} else {
-		logging.GetLogger(ctx).Infof("Successfully connected to database, found %d products", len(all))
+		logging.GetLogger().Infof("Successfully connected to database, found %d products", len(all))
 	}
 
 	productServiceServer := product.NewServer(
@@ -90,7 +90,7 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServiceServer) error {
-	logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
+	logger := logging.GetLogger().WithFields(map[string]interface{}{
 		"IP":   a.cfg.GRPC.IP,
 		"Port": a.cfg.GRPC.Port,
 	})
@@ -113,7 +113,7 @@ func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServ
 }
 
 func (a *App) StartHTTP(ctx context.Context) error {
-    logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
+    logger := logging.GetLogger().WithFields(map[string]interface{}{
 		"IP":   a.cfg.HTTP.IP,
 		"Port": a.cfg.HTTP.Port,
 	})

@@ -44,7 +44,7 @@ func (s *ProductStorage) All(ctx context.Context) ([]model.Product, error) {
 	// TODO Реализовать filtering and sorting по полям
 
 	sql, args, err := query.ToSql()
-	logger := logging.GetLogger(ctx).WithFields(map[string]interface{}{
+	logger := logging.GetLogger().WithFields(map[string]interface{}{
 		"sql":   sql,
 		"table": table,
 		"args":  args, 

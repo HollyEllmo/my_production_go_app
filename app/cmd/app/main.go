@@ -12,7 +12,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logger := logging.GetLogger(ctx)
+	logger := logging.GetLogger()
 
 	logger.Println("config initializing")
 	cfg := config.GetConfig()
@@ -23,7 +23,7 @@ func main() {
 
 	a, err := app.NewApp(ctx, cfg)
 	if err != nil {
-		logging.GetLogger(ctx).Fatalln(err)
+		logging.GetLogger().Fatalln(err)
 	}
 
 	logger.Infoln("Running Application")
