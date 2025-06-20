@@ -8,6 +8,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
@@ -31,6 +32,7 @@ require (
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

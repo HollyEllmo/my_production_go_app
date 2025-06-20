@@ -14,7 +14,6 @@ import (
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
 	"github.com/HollyEllmo/my-first-go-project/internal/controller/grpc/v1/product"
-	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
@@ -36,14 +35,14 @@ type App struct {
 }
 
 func NewApp(ctx context.Context, config *config.Config) (App, error) {
-	logging.GetLogger().Println("Initializing router...")
+	logging.Infoln(ctx, "Initializing router...")
 	router := httprouter.New()
 
-	logging.GetLogger().Println("swagger docs initializing")
+	logging.Infoln(ctx, "swagger docs initializing")
 	router.Handler(http.MethodGet, "/swagger", http.RedirectHandler("/swagger/index.html", http.StatusMovedPermanently))
 	router.Handler(http.MethodGet, "/swagger/*any", httpSwagger.WrapHandler)
 
-	logging.GetLogger().Println("heartbeat metric initializing")
+	logging.Infoln(ctx, "heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
 
@@ -54,16 +53,16 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 
 	pgClient, err := postgresql.NewClient(ctx, 5, time.Second*5, pgConfig)
 	if err != nil {
-		logging.GetLogger().Fatalln(err)
+		logging.WithError(ctx, err).Fatalln("failed to connect to PostgreSQL")
 	}
 
-	productStorage := storage.NewProductStorage(pgClient)
-	all, err := productStorage.All(ctx)
-	if err != nil {
-		logging.GetLogger().Fatalln(err)
-	} else {
-		logging.GetLogger().Infof("Successfully connected to database, found %d products", len(all))
-	}
+	// productStorage := storage.NewProductStorage(pgClient)
+	// all, err := productStorage.All(ctx, nil, nil)
+	// if err != nil {
+	// 	logging.GetLogger().Fatalln(err)
+	// } else {
+	// 	logging.Infof(ctx, "Successfully connected to database, found %d products", len(all))
+	// }
 
 	productServiceServer := product.NewServer(
 		pb_prod_products.UnimplementedProductServiceServer{},
@@ -90,7 +89,7 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServiceServer) error {
-	logger := logging.GetLogger().WithFields(map[string]interface{}{
+	logger := logging.WithFields(ctx, map[string]interface{}{
 		"IP":   a.cfg.GRPC.IP,
 		"Port": a.cfg.GRPC.Port,
 	})
@@ -113,7 +112,7 @@ func (a *App) StartGRPC(ctx context.Context, server pb_prod_products.ProductServ
 }
 
 func (a *App) StartHTTP(ctx context.Context) error {
-    logger := logging.GetLogger().WithFields(map[string]interface{}{
+    logger := logging.WithFields(ctx, map[string]interface{}{
 		"IP":   a.cfg.HTTP.IP,
 		"Port": a.cfg.HTTP.Port,
 	})

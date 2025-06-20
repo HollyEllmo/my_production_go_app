@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
+	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
+	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	db "github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql/model"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
@@ -27,9 +29,11 @@ const (
 	table = "product"
 )
 
-// TODO вынести этот метод в отдельный пакет, например, в pkg/logging
 
-func (s *ProductStorage) All(ctx context.Context) ([]model.Product, error) {
+func (s *ProductStorage) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error) {
+	sortDB := db.NewSortOptions(sorting)
+	filterDB := db.NewFilters(filtering)
+
 	query := s.queryBuilder.Select("id").
 		Column("name").
 		Column("description").
@@ -41,10 +45,11 @@ func (s *ProductStorage) All(ctx context.Context) ([]model.Product, error) {
 		Column("updated_at").
 		From(scheme + "." + table)
 
-	// TODO Реализовать filtering and sorting по полям
+    query = filterDB.Enrich(query, "")
+    query = sortDB.Sort(query, "")
 
 	sql, args, err := query.ToSql()
-	logger := logging.GetLogger().WithFields(map[string]interface{}{
+	logger := logging.WithFields(ctx, map[string]interface{}{
 		"sql":   sql,
 		"table": table,
 		"args":  args, 
