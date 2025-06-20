@@ -14,6 +14,9 @@ import (
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
 	"github.com/HollyEllmo/my-first-go-project/internal/controller/grpc/v1/product"
+	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/policy"
+	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/service"
+	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
@@ -56,15 +59,18 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 		logging.WithError(ctx, err).Fatalln("failed to connect to PostgreSQL")
 	}
 
-	// productStorage := storage.NewProductStorage(pgClient)
-	// all, err := productStorage.All(ctx, nil, nil)
-	// if err != nil {
-	// 	logging.GetLogger().Fatalln(err)
-	// } else {
-	// 	logging.Infof(ctx, "Successfully connected to database, found %d products", len(all))
-	// }
+	// Create the storage layer
+	productStorage := storage.NewProductStorage(pgClient)
 
+	// Create the service layer
+	productService := service.NewProductService(productStorage)
+
+	// Create the policy layer
+	productPolicy := policy.NewProductPolicy(productService)
+
+	// Create the gRPC server
 	productServiceServer := product.NewServer(
+		productPolicy,
 		pb_prod_products.UnimplementedProductServiceServer{},
 	)
 

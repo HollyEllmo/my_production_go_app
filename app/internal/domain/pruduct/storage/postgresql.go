@@ -17,8 +17,8 @@ type ProductStorage struct {
 	client 	 PostgreSQLClient
 }
 
-func NewProductStorage(client PostgreSQLClient) ProductStorage {
-	return ProductStorage{
+func NewProductStorage(client PostgreSQLClient) *ProductStorage {
+	return &ProductStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client: client,
 	}
