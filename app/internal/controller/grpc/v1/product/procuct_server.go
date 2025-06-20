@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
+	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 )
 
@@ -12,6 +13,7 @@ func (s *Server) CreateProduct(ctx context.Context, request *pb_prod_products.Cr
 }
 
 func (s *Server) AllProducts(ctx context.Context, request *pb_prod_products.AllProductsRequest) (*pb_prod_products.AllProductsResponse, error) {
+	logging.GetLogger().Warningf("ITS IS ALIVE !!!")
 	sort := model.ProductsSort(request)
 	filter := model.ProductsFilter(request)
 
@@ -25,5 +27,7 @@ func (s *Server) AllProducts(ctx context.Context, request *pb_prod_products.AllP
 		pbProducts = append(pbProducts, p.ToProto())
 	}
 
-	return &pb_prod_products.AllProductsResponse{}, nil
+	return &pb_prod_products.AllProductsResponse{
+		Product: pbProducts,
+	}, nil
 }
