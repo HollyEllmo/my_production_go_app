@@ -36,7 +36,7 @@ func (s *Server) CreateProduct(ctx context.Context, req *pb_prod_products.Create
 
 	product, err := s.policy.CreateProduct(ctx, d)
 	if err != nil {
-		return  nil, err
+		return nil, err
 	}
 
 	return &pb_prod_products.CreateProductResponse{

@@ -12,7 +12,7 @@ import (
 
 type productService interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error)
-	Create(ctx context.Context, dto *dto.CreateProductDTO) (model.Product, error)
+	Create(ctx context.Context, dto *dto.CreateProductDTO) (*model.Product, error)
 }
 
 type ProductPolicy struct {
@@ -34,7 +34,7 @@ func (p *ProductPolicy) All(ctx context.Context, filtering filter.Filterable, so
 	return products, nil
 }
 
-func (p *ProductPolicy) CreateProduct(ctx context.Context, d *dto.CreateProductDTO) (model.Product, error) {
-	return  p.productService.Create(ctx, d)
+func (p *ProductPolicy) CreateProduct(ctx context.Context, d *dto.CreateProductDTO) (*model.Product, error) {
+	return p.productService.Create(ctx, d)
 }
 
