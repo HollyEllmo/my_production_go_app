@@ -3,9 +3,33 @@ package model
 import (
 	"time"
 
-	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 )
+
+// NewProduct создает новый экземпляр Product
+func NewProduct(
+	id, name, description string,
+	imageID *string,
+	price string,
+	currencyID, rating uint32,
+	categoryID, specification string,
+	createdAt time.Time,
+	updatedAt *time.Time,
+) *Product {
+	return &Product{
+		ID:            id,
+		Name:          name,
+		Description:   description,
+		ImageID:       imageID,
+		Price:         price,
+		CurrencyID:    currencyID,
+		Rating:        rating,
+		CategoryID:    categoryID,
+		Specification: specification,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
+	}
+}
 
 type Product struct {
 	ID            string 
@@ -19,26 +43,6 @@ type Product struct {
 	Specification string 
 	CreatedAt     time.Time 
 	UpdatedAt     *time.Time 
-}
-
-func NewProduct(sp storage.Product) *Product {
-	var imageID *string
-	if sp.ImageID.Valid {
-		imageID = &sp.ImageID.String
-	}
-	return  &Product{
-		ID:            sp.ID,
-		Name:          sp.Name,
-		Description:   sp.Description,
-		ImageID:       imageID,
-		Price:         sp.Price,
-		CurrencyID:    sp.CurrencyID,
-		Rating:        sp.Rating,
-		CategoryID:    sp.CategoryID,
-		Specification: sp.Specification,
-		CreatedAt:     sp.CreatedAt,
-		UpdatedAt:     sp.UpdatedAt,
-	}
 }
 
 func (p Product) ToProto() *pb_prod_products.Product {

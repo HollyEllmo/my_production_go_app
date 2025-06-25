@@ -24,25 +24,25 @@ type Product struct {
 }
 
 func (p Product) ToModel() model.Product {
-    var imageID *string
-    
-    if p.ImageID.Valid {
-        imageID = &p.ImageID.String
-    }
-    
-    return model.Product{
-        ID:            p.ID,
-        Name:          p.Name,
-        Description:   p.Description,
-        ImageID:       imageID,
-        Price:         p.Price,
-        CurrencyID:    p.CurrencyID,
-        Rating:        p.Rating,
-        CategoryID:    p.CategoryID,
-        Specification: p.Specification,
-        CreatedAt:     p.CreatedAt,
-        UpdatedAt:     p.UpdatedAt,
-    }
+	var imageID *string
+	
+	if p.ImageID.Valid {
+		imageID = &p.ImageID.String
+	}
+	
+	return model.Product{
+		ID:            p.ID,
+		Name:          p.Name,
+		Description:   p.Description,
+		ImageID:       imageID,
+		Price:         p.Price,
+		CurrencyID:    p.CurrencyID,
+		Rating:        p.Rating,
+		CategoryID:    p.CategoryID,
+		Specification: p.Specification,
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+	}
 }
 
 type CreateProductStorageDTO struct {

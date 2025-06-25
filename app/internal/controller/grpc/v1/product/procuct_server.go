@@ -31,6 +31,15 @@ func (s *Server) AllProducts(ctx context.Context, request *pb_prod_products.AllP
 	}, nil
 }
 
-func (s *Server) CreateProduct(ctx context.Context, request *pb_prod_products.CreateProductRequest) (*pb_prod_products.CreateProductResponse, error) {
-	d := dto.NewCreateProductDTOFromPB(request)
+func (s *Server) CreateProduct(ctx context.Context, req *pb_prod_products.CreateProductRequest) (*pb_prod_products.CreateProductResponse, error) {
+	d := dto.NewCreateProductDTOFromPB(req)
+
+	product, err := s.policy.CreateProduct(ctx, d)
+	if err != nil {
+		return  nil, err
+	}
+
+	return &pb_prod_products.CreateProductResponse{
+		Product: product.ToProto(),
+	}, nil
 }

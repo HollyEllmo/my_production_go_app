@@ -47,5 +47,7 @@ func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.P
 		return  nil, err
 	}
 
-	return NewProduct(one), nil
+	// Используем метод ToModel() для конвертации
+	product := one.ToModel()
+	return &product, nil
 }
