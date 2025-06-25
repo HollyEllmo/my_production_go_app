@@ -1,4 +1,4 @@
-package model
+package dto
 
 import pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 

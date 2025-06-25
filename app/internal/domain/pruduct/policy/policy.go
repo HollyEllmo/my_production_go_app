@@ -3,6 +3,7 @@ package policy
 import (
 	"context"
 
+	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
@@ -11,7 +12,7 @@ import (
 
 type productService interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error)
-	Create(ctx context.Context, dto model.CreateProductDTO) (model.Product, error)
+	Create(ctx context.Context, dto *dto.CreateProductDTO) (model.Product, error)
 }
 
 type ProductPolicy struct {
@@ -31,5 +32,9 @@ func (p *ProductPolicy) All(ctx context.Context, filtering filter.Filterable, so
 	}
 
 	return products, nil
+}
+
+func (p *ProductPolicy) CreateProduct(ctx context.Context, d *dto.CreateProductDTO) (model.Product, error) {
+	return  p.productService.Create(ctx, d)
 }
 

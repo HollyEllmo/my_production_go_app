@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
@@ -27,6 +28,7 @@ func NewProductStorage(client PostgreSQLClient) *ProductStorage {
 const (
 	scheme = "public"
 	table = "product"
+	tableScheme = scheme + "." + table
 )
 
 
@@ -43,7 +45,7 @@ func (s *ProductStorage) All(ctx context.Context, filtering filter.Filterable, s
 		Column("rating").
 		Column("created_at").
 		Column("updated_at").
-		From(scheme + "." + table)
+		From(tableScheme)
 
     query = filterDB.Enrich(query, "")
     query = sortDB.Sort(query, "")
@@ -86,4 +88,57 @@ func (s *ProductStorage) All(ctx context.Context, filtering filter.Filterable, s
 	
 
 	return list, nil
+}
+
+func (s *ProductStorage) Create(ctx context.Context, dto *CreateProductStorageDTO) error {
+	sql, args, buildError := s.queryBuilder.
+	 Insert(tableScheme).
+	 Columns(
+		"id",
+		"name",
+		"description",
+		"image_id",
+		"price",
+		"currency_id",
+		"category_id",
+		"specification",
+		"rating",
+		"created_at",
+		"updated_at",
+	 ).Values(
+		dto.ID,
+		dto.Name,
+		dto.Description,
+		dto.ImageID,
+		dto.Price,
+		dto.CurrencyID,
+		dto.CategoryID,
+		dto.Specification,
+		dto.Rating,
+		dto.CreatedAt,
+		dto.UpdatedAt,
+	 ).PlaceholderFormat(sq.Dollar).ToSql()
+
+	 logger := logging.WithFields(ctx, map[string]interface{}{
+		"sql":   sql,
+		"table": tableScheme,
+		"args":  args, 
+	})
+	if buildError != nil {
+		buildError = db.ErrCreateQuery(buildError)
+		logger.Error(buildError)
+		return buildError
+	}
+
+	if exec, execErr := s.client.Exec(ctx, sql, args...); execErr != nil {
+		execErr = db.ErrDoQuery(execErr)
+		logger.Error(execErr)
+		return execErr
+	} else if exec.RowsAffected() == 0 || !exec.Insert() {
+		execErr = db.ErrDoQuery(errors.New("product was not created. 0 raws were affected"))
+		logger.Error(execErr)
+		return execErr
+	}
+
+	return nil
 }

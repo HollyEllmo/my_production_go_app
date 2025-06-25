@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
+	"github.com/google/uuid"
 )
 
 type Product struct {
@@ -43,7 +45,8 @@ func (p Product) ToModel() model.Product {
     }
 }
 
-type CreateProductDTO struct {
+type CreateProductStorageDTO struct {
+	ID			  string
 	Name          string 
 	Description   string 
 	ImageID       sql.NullString
@@ -54,4 +57,30 @@ type CreateProductDTO struct {
 	Specification string 
 	CreatedAt     time.Time 
 	UpdatedAt     *time.Time 
+}
+
+func NewCreateProductStorageDTO(d *dto.CreateProductDTO) *CreateProductStorageDTO {
+	now := time.Now()
+
+    var imageID sql.NullString
+	if d.ImageID != nil {
+		imageID = sql.NullString{
+			String: *d.ImageID,
+			Valid: true,
+		}
+	}
+
+	return  &CreateProductStorageDTO{
+		ID: uuid.New().String(),
+		Name:          d.Name,
+		ImageID: 	   imageID,
+		Description:   d.Description,
+		Price:         d.Price,
+		CurrencyID:    d.CurrencyID,
+		Rating:        d.Rating,
+		CategoryID:    d.CategoryID,
+		Specification: d.Specification,
+		CreatedAt:     now,
+		UpdatedAt:     &now,
+	}
 }
