@@ -142,3 +142,46 @@ func (s *ProductStorage) Create(ctx context.Context, dto *CreateProductStorageDT
 
 	return nil
 }
+
+func (s *ProductStorage) One(ctx context.Context, ID string) (*Product, error) {
+	query := s.queryBuilder.Select("id").
+		Column("name").
+		Column("description").
+		Column("image_id").
+		Column("price").
+		Column("currency_id").
+		Column("rating").
+		Column("category_id").
+		Column("specification").
+		Column("created_at").
+		Column("updated_at").
+		From(tableScheme).
+		Where(sq.Eq{"id": ID})
+
+	sql, args, err := query.ToSql()
+	logger := logging.WithFields(ctx, map[string]interface{}{
+		"sql":   sql,
+		"table": table,
+		"args":  args,
+		"id":    ID,
+	})
+	if err != nil {
+		err = db.ErrCreateQuery(err)
+		logger.Error(err)
+		return nil, err
+	}
+
+	logger.Trace("do query")
+	var p Product
+	if err = s.client.QueryRow(ctx, sql, args...).Scan(
+		&p.ID, &p.Name, &p.Description, &p.ImageID, &p.Price, 
+		&p.CurrencyID, &p.Rating, &p.CategoryID, &p.Specification, 
+		&p.CreatedAt, &p.UpdatedAt,
+	); err != nil {
+		err = db.ErrScan(postgresql.ParsePgError(err))
+		logger.Error(err)
+		return nil, err
+	}
+
+	return &p, nil
+}
