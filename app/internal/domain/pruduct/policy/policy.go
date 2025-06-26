@@ -11,9 +11,9 @@ import (
 )
 
 type productService interface {
-	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error)
+	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error)
 	Create(ctx context.Context, dto *dto.CreateProductDTO) (*model.Product, error)
-	One(ctx context.Context, ID string) (*model.Product, error)
+	One(ctx context.Context, id string) (*model.Product, error)
 }
 
 type ProductPolicy struct {
@@ -26,7 +26,7 @@ func NewProductPolicy(productService productService) *ProductPolicy {
 	}
 }
 
-func (p *ProductPolicy) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error) {
+func (p *ProductPolicy) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error) {
 	products, err := p.productService.All(ctx, filtering, sorting)
 	if err != nil {
 		return nil, errors.Wrap(err, "productService.All")
@@ -37,5 +37,14 @@ func (p *ProductPolicy) All(ctx context.Context, filtering filter.Filterable, so
 
 func (p *ProductPolicy) CreateProduct(ctx context.Context, d *dto.CreateProductDTO) (*model.Product, error) {
 	return p.productService.Create(ctx, d)
+}
+
+func (p *ProductPolicy) One(ctx context.Context, id string) (*model.Product, error) {
+	product, err := p.productService.One(ctx, id)
+	if err != nil {
+		return nil, errors.Wrap(err, "productService.One")
+	}
+
+	return product, nil
 }
 

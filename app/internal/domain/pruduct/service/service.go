@@ -15,7 +15,7 @@ import (
 )
 
 // convertProductStorageToModel конвертирует ProductStorage в модель Product
-func convertProductStorageToModel(ps *dao.ProductStorage) model.Product {
+func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
 	var imageID *string
 	if ps.ImageID.Valid {
 		imageID = &ps.ImageID.String
@@ -43,7 +43,7 @@ func convertProductStorageToModel(ps *dao.ProductStorage) model.Product {
 		}
 	}
 
-	return model.Product{
+	return &model.Product{
 		ID:            ps.ID,
 		Name:          ps.Name,
 		Description:   ps.Description,
@@ -60,7 +60,7 @@ func convertProductStorageToModel(ps *dao.ProductStorage) model.Product {
 
 type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
-	One(ctx context.Context, ID string) (*dao.ProductStorage, error)
+	One(ctx context.Context, id string) (*dao.ProductStorage, error)
 	Create(ctx context.Context, m map[string]interface{}) error
 }
 
@@ -74,14 +74,14 @@ func NewProductService(repository repository) *Service {
 	}
 }
 
-func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error) {
+func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error) {
 	productsStorage, err := s.repository.All(ctx, filtering, sorting)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.All")
 	}
 
-	// Конвертируем []*dao.ProductStorage в []model.Product
-	products := make([]model.Product, len(productsStorage))
+	// Конвертируем []*dao.ProductStorage в []*model.Product
+	products := make([]*model.Product, len(productsStorage))
 	for i, ps := range productsStorage {
 		products[i] = convertProductStorageToModel(ps)
 	}
@@ -119,15 +119,15 @@ func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.P
 
 	// Используем функцию convertProductStorageToModel для конвертации
 	product := convertProductStorageToModel(one)
-	return &product, nil
+	return product, nil
 }
 
-func (s *Service) One(ctx context.Context, ID string) (*model.Product, error) {
-	productStorage, err := s.repository.One(ctx, ID)
+func (s *Service) One(ctx context.Context, id string) (*model.Product, error) {
+	one, err := s.repository.One(ctx, id)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.One")
 	}
 
-	product := convertProductStorageToModel(productStorage)
-	return &product, nil
+	product := convertProductStorageToModel(one)
+	return product, nil
 }
