@@ -131,25 +131,6 @@ func (s *ProductDAO) Create(ctx context.Context, m map[string]interface{}) error
 	return nil
 }
 
-func (s *ProductDAO) CreateProduct(ctx context.Context, dto *CreateProductStorageDTO) error {
-	m := map[string]interface{}{
-		"id":            dto.ID,
-		"name":          dto.Name,
-		"description":   dto.Description,
-		"price":         dto.Price,
-		"currency_id":   dto.CurrencyID,
-		"rating":        dto.Rating,
-		"category_id":   dto.CategoryID,
-		"specification": dto.Specification,
-	}
-
-	if dto.ImageID != nil {
-		m["image_id"] = *dto.ImageID
-	}
-
-	return s.Create(ctx, m)
-}
-
 func (s *ProductDAO) One(ctx context.Context, id string) (*ProductStorage, error) {
 	sql, args, buildErr := s.queryBuilder.
 		Select("id").

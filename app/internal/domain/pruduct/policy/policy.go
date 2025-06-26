@@ -13,6 +13,7 @@ import (
 type productService interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]model.Product, error)
 	Create(ctx context.Context, dto *dto.CreateProductDTO) (*model.Product, error)
+	One(ctx context.Context, ID string) (*model.Product, error)
 }
 
 type ProductPolicy struct {

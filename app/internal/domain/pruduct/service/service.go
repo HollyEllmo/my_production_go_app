@@ -61,7 +61,7 @@ func convertProductStorageToModel(ps *dao.ProductStorage) model.Product {
 type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
 	One(ctx context.Context, ID string) (*dao.ProductStorage, error)
-	CreateProduct(ctx context.Context, createProductStorageDto *dao.CreateProductStorageDTO) error
+	Create(ctx context.Context, m map[string]interface{}) error
 }
 
 type Service struct {
@@ -91,7 +91,24 @@ func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting 
 
 func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.Product, error) {
 	createProductStorageDTO := dao.NewCreateProductStorageDTO(d)
-	err := s.repository.CreateProduct(ctx, createProductStorageDTO)
+	
+	// Конвертируем DTO в map для вызова метода Create
+	m := map[string]interface{}{
+		"id":            createProductStorageDTO.ID,
+		"name":          createProductStorageDTO.Name,
+		"description":   createProductStorageDTO.Description,
+		"price":         createProductStorageDTO.Price,
+		"currency_id":   createProductStorageDTO.CurrencyID,
+		"rating":        createProductStorageDTO.Rating,
+		"category_id":   createProductStorageDTO.CategoryID,
+		"specification": createProductStorageDTO.Specification,
+	}
+	
+	if createProductStorageDTO.ImageID != nil {
+		m["image_id"] = *createProductStorageDTO.ImageID
+	}
+	
+	err := s.repository.Create(ctx, m)
 	if err != nil {
 		return nil, err
 	}
@@ -102,5 +119,15 @@ func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.P
 
 	// Используем функцию convertProductStorageToModel для конвертации
 	product := convertProductStorageToModel(one)
+	return &product, nil
+}
+
+func (s *Service) One(ctx context.Context, ID string) (*model.Product, error) {
+	productStorage, err := s.repository.One(ctx, ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "repository.One")
+	}
+
+	product := convertProductStorageToModel(productStorage)
 	return &product, nil
 }
