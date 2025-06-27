@@ -4,10 +4,10 @@ cloud.google.com/go/compute/metadata v0.7.0/go.mod h1:j5MvL9PprKL39t166CoB1uVHfQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250626193132-33bce33c4c0b h1:L03YuyT6EW/hrQu+Ruj4e2AzhogWqK/ItRwWBrHnEk4=
-github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250626193132-33bce33c4c0b/go.mod h1:nRyacOIieKffas3CvFMnbdIabquJeNuL73p+ZO0fGVI=
-github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250626193132-33bce33c4c0b h1:azdnUg3vdHrCgbA52eo+J8/UviRSDfJ3QmXl66OxaMM=
-github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250626193132-33bce33c4c0b/go.mod h1:tzNV5F6Bl/i4RugVUGDEpUE4eXyT/20R84SoGTyH4tg=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250627054747-521fdb8342eb h1:Ns/7lXFa4UTOrEfoqHX2GdFRZA+ynd6jOAXscN2r6bU=
+github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250627054747-521fdb8342eb/go.mod h1:nRyacOIieKffas3CvFMnbdIabquJeNuL73p+ZO0fGVI=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250627054747-521fdb8342eb h1:08xthWXhDg0XwguZE3yxMOczu8StoJIzB5KbuIP8Cgk=
+github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250627054747-521fdb8342eb/go.mod h1:tzNV5F6Bl/i4RugVUGDEpUE4eXyT/20R84SoGTyH4tg=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=

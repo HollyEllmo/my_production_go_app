@@ -25,10 +25,10 @@ func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *
 	}
 
 	// Преобразуем categoryId из string в uint32
-	categoryID, err := strconv.ParseUint(product.GetCategoryId(), 10, 32)
-	if err != nil {
-		categoryID = 0 // значение по умолчанию в случае ошибки
-	}
+	// categoryID, err := strconv.ParseUint(product.GetCategoryId(), 10, 32)
+	// if err != nil {
+	// 	categoryID = 0 // значение по умолчанию в случае ошибки
+	// }
 
 	return &CreateProductDTO{
 		Name:          product.GetName(),
@@ -37,7 +37,7 @@ func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *
 		Price:         price,
 		CurrencyID:    product.GetCurrencyId(),
 		Rating:        product.GetRating(),
-		CategoryID:    uint32(categoryID),
+		CategoryID:    product.GetCategoryId(),
 		Specification: product.GetSpecification(),
 	}
 }
