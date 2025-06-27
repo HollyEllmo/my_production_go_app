@@ -22,8 +22,8 @@ func (s *Server) AllProducts(ctx context.Context, request *pb_prod_products.AllP
 	}
 
 	pbProducts := make([]*pb_prod_products.Product, len(all))
-	for _, p := range all {
-		pbProducts = append(pbProducts, p.ToProto())
+	for i, p := range all {
+		pbProducts[i] = p.ToProto()
 	}
 
 	return &pb_prod_products.AllProductsResponse{
