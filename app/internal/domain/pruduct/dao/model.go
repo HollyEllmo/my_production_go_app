@@ -2,6 +2,7 @@ package dao
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
 	"github.com/google/uuid"
@@ -37,6 +38,7 @@ type CreateProductStorageDTO struct {
 
 // NewCreateProductStorageDTO создает DTO для создания продукта в хранилище
 func NewCreateProductStorageDTO(dto *dto.CreateProductDTO) *CreateProductStorageDTO {
+	now := time.Now().UTC().Format(time.RFC3339)
 	return &CreateProductStorageDTO{
 		ID:            uuid.New().String(),
 		Name:          dto.Name,
@@ -47,5 +49,7 @@ func NewCreateProductStorageDTO(dto *dto.CreateProductDTO) *CreateProductStorage
 		Rating:        dto.Rating,
 		CategoryID:    dto.CategoryID,
 		Specification: dto.Specification,
+		CreatedAt:     now,
+		UpdatedAt:     now,
 	}
 }
