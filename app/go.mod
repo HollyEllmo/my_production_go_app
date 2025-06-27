@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/HollyEllmo/my-proto-repo/gen/go/filter v0.0.0
-	github.com/HollyEllmo/my-proto-repo/gen/go/prod_service v0.0.0-20250627064558-b9f6fbd42906
+	github.com/HollyEllmo/my-proto-repo/gen/go/prod_service v0.0.0-20250627103223-558f533c8f6e
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/google/uuid v1.6.0
@@ -15,6 +15,7 @@ require (
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lib/pq v1.10.9
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.3
@@ -61,6 +62,6 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250627064558-b9f6fbd42906
+replace github.com/HollyEllmo/my-proto-repo/gen/go/prod_service => github.com/HollyEllmo/my_proto_repo/gen/go/prod_service v0.0.0-20250627103223-558f533c8f6e
 
-replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250627064558-b9f6fbd42906
+replace github.com/HollyEllmo/my-proto-repo/gen/go/filter => github.com/HollyEllmo/my_proto_repo/gen/go/filter v0.0.0-20250627103223-558f533c8f6e

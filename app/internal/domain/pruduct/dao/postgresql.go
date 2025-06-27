@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"time"
 
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
@@ -209,18 +208,12 @@ func (s *ProductDAO) One(ctx context.Context, id string) (*ProductStorage, error
 }
 
 func (s *ProductDAO) Update(ctx context.Context, id string, m map[string]interface{}) error {
-	// Автоматически добавляем текущее время для updated_at
-	if m == nil {
-		m = make(map[string]interface{})
-	}
-	m["updated_at"] = time.Now().UTC().Format(time.RFC3339)
-	
 	sql, args, buildErr := s.queryBuilder.
 		Update(tableScheme).
 		SetMap(m).
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
-		ToSql()
+	ToSql()
 
 	logger := logging.WithFields(ctx, map[string]interface{}{
 		"sql":   sql,
@@ -275,3 +268,5 @@ func (s *ProductDAO) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+

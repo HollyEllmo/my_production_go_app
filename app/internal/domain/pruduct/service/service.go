@@ -11,6 +11,7 @@ import (
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
 	"github.com/HollyEllmo/my-first-go-project/pkg/errors"
+	"github.com/mitchellh/mapstructure"
 )
 
 // convertProductStorageToModel конвертирует ProductStorage в модель Product
@@ -61,6 +62,8 @@ type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
 	One(ctx context.Context, id string) (*dao.ProductStorage, error)
 	Create(ctx context.Context, dto *dao.CreateProductStorageDTO) error
+	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, id string, dm map[string]interface{}) error
 }
 
 type Service struct {
@@ -113,4 +116,20 @@ func (s *Service) One(ctx context.Context, id string) (*model.Product, error) {
 
 	product := convertProductStorageToModel(one)
 	return product, nil
+}
+
+func (s *Service) Delete(ctx context.Context, id string) error {
+	return s.repository.Delete(ctx, id)
+}
+
+func (s *Service) Update(ctx context.Context, id string, d *dto.UpdateProductDTO) error {
+	var dm = make(map[string]interface{})
+
+	err := mapstructure.Decode(d, &dm)
+	if err != nil {
+		return  errors.Wrap(err, "mapstructure.Decode UpdateProductDTO")
+	}
+
+	// Обновляем продукт в репозитории
+	return s.repository.Update(ctx, id, dm)
 }
