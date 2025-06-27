@@ -10,10 +10,10 @@ type CreateProductDTO struct {
 	Name          string 
 	Description   string 
 	ImageID       *string 
-	Price         string 
+	Price         uint64 
 	CurrencyID    uint32
 	Rating        uint32
-	CategoryID    string 
+	CategoryID    uint32
 	Specification string 
 }
 

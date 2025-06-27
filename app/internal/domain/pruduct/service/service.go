@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"strconv"
 	"time"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
@@ -48,10 +47,10 @@ func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
 		Name:          ps.Name,
 		Description:   ps.Description,
 		ImageID:       imageID,
-		Price:         strconv.FormatUint(ps.Price, 10), // Преобразуем uint64 в string
+		Price:         ps.Price, // Преобразуем uint64 в string
 		CurrencyID:    ps.CurrencyID,
 		Rating:        ps.Rating,
-		CategoryID:    strconv.FormatUint(uint64(ps.CategoryID), 10), // Преобразуем uint32 в string
+		CategoryID:    ps.CategoryID,
 		Specification: specificationStr,
 		CreatedAt:     createdAt,
 		UpdatedAt:     updatedAt,
@@ -61,7 +60,7 @@ func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
 type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
 	One(ctx context.Context, id string) (*dao.ProductStorage, error)
-	Create(ctx context.Context, m map[string]interface{}) error
+	Create(ctx context.Context, dto *dao.CreateProductStorageDTO) error
 }
 
 type Service struct {
@@ -75,14 +74,14 @@ func NewProductService(repository repository) *Service {
 }
 
 func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error) {
-	productsStorage, err := s.repository.All(ctx, filtering, sorting)
+	dbProducts, err := s.repository.All(ctx, filtering, sorting)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.All")
 	}
 
 	// Конвертируем []*dao.ProductStorage в []*model.Product
-	products := make([]*model.Product, len(productsStorage))
-	for i, ps := range productsStorage {
+	products := make([]*model.Product, len(dbProducts))
+	for i, ps := range dbProducts {
 		products[i] = convertProductStorageToModel(ps)
 	}
 
@@ -92,23 +91,7 @@ func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting 
 func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.Product, error) {
 	createProductStorageDTO := dao.NewCreateProductStorageDTO(d)
 	
-	// Конвертируем DTO в map для вызова метода Create
-	m := map[string]interface{}{
-		"id":            createProductStorageDTO.ID,
-		"name":          createProductStorageDTO.Name,
-		"description":   createProductStorageDTO.Description,
-		"price":         createProductStorageDTO.Price,
-		"currency_id":   createProductStorageDTO.CurrencyID,
-		"rating":        createProductStorageDTO.Rating,
-		"category_id":   createProductStorageDTO.CategoryID,
-		"specification": createProductStorageDTO.Specification,
-	}
-	
-	if createProductStorageDTO.ImageID != nil {
-		m["image_id"] = *createProductStorageDTO.ImageID
-	}
-	
-	err := s.repository.Create(ctx, m)
+	err := s.repository.Create(ctx, createProductStorageDTO)
 	if err != nil {
 		return nil, err
 	}

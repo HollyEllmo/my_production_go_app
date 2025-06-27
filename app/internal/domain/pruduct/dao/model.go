@@ -15,7 +15,7 @@ type ProductStorage struct {
 	Price         uint64
 	CurrencyID    uint32
 	Rating        uint32
-	CategoryID    uint32
+	CategoryID    uint32 // Changed to int32 for consistency with proto definition
 	Specification map[string]interface{}
 	CreatedAt     sql.NullString
 	UpdatedAt     sql.NullString
@@ -26,11 +26,13 @@ type CreateProductStorageDTO struct {
 	Name          string
 	Description   string
 	ImageID       *string
-	Price         string
+	Price         uint64
 	CurrencyID    uint32
 	Rating        uint32
-	CategoryID    string
-	Specification string
+	CategoryID    uint32
+	Specification map[string]interface{}
+	CreatedAt     string
+	UpdatedAt     string
 }
 
 // NewCreateProductStorageDTO создает DTO для создания продукта в хранилище

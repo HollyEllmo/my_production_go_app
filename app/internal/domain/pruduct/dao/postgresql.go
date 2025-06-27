@@ -101,21 +101,44 @@ func (s *ProductDAO) All(ctx context.Context, filtering filter.Filterable, sorti
 	return list, nil
 }
 
-func (s *ProductDAO) Create(ctx context.Context, m map[string]interface{}) error {
-	sql, args, buildErr := s.queryBuilder.
-		Insert(tableScheme).
-		SetMap(m).
-		PlaceholderFormat(sq.Dollar).ToSql()
+func (s *ProductDAO) Create(ctx context.Context, dto *CreateProductStorageDTO) error {
+	sql, args, buildError := s.queryBuilder.
+	 Insert(tableScheme).
+	 Columns(
+		"id",
+		"name",
+		"description",
+		"image_id",
+		"price",
+		"currency_id",
+		"rating",
+		"category_id",
+		"specification",
+		"created_at",
+		"updated_at",
+	 ).Values(
+		dto.ID,
+		dto.Name,
+		dto.Description,
+		dto.ImageID,
+		dto.Price,
+		dto.CurrencyID,
+		dto.Rating,
+		dto.CategoryID,
+		dto.Specification,
+		dto.CreatedAt,
+		dto.UpdatedAt,
+	 ).PlaceholderFormat(sq.Dollar).ToSql()
 
-	logger := logging.WithFields(ctx, map[string]interface{}{
+	 logger := logging.WithFields(ctx, map[string]interface{}{
 		"sql":   sql,
 		"table": tableScheme,
-		"args":  args,
+		"args":  args, 
 	})
-	if buildErr != nil {
-		buildErr = db.ErrCreateQuery(buildErr)
-		logger.Error(buildErr)
-		return buildErr
+	if buildError != nil {
+		buildError = db.ErrCreateQuery(buildError)
+		logger.Error(buildError)
+		return buildError
 	}
 
 	if exec, execErr := s.client.Exec(ctx, sql, args...); execErr != nil {
@@ -123,7 +146,7 @@ func (s *ProductDAO) Create(ctx context.Context, m map[string]interface{}) error
 		logger.Error(execErr)
 		return execErr
 	} else if exec.RowsAffected() == 0 || !exec.Insert() {
-		execErr = db.ErrDoQuery(errors.New("product was not created. 0 rows were affected"))
+		execErr = db.ErrDoQuery(errors.New("product was not created. 0 raws were affected"))
 		logger.Error(execErr)
 		return execErr
 	}
