@@ -1,8 +1,6 @@
 package model
 
 import (
-	"strconv"
-
 	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 )
 
@@ -19,10 +17,10 @@ type CreateProductDTO struct {
 
 func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *CreateProductDTO {
 	// Преобразуем price из string в uint64
-	price, err := strconv.ParseUint(product.GetPrice(), 10, 64)
-	if err != nil {
-		price = 0 // значение по умолчанию в случае ошибки
-	}
+	// price, err := strconv.ParseUint(product.GetPrice(), 10, 64)
+	// if err != nil {
+	// 	price = 0 // значение по умолчанию в случае ошибки
+	// }
 
 	// Преобразуем categoryId из string в uint32
 	// categoryID, err := strconv.ParseUint(product.GetCategoryId(), 10, 32)
@@ -34,7 +32,7 @@ func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *
 		Name:          product.GetName(),
 		Description:   product.GetDescription(),
 		ImageID:       product.ImageId,
-		Price:         price,
+		Price:         product.GetPrice(),
 		CurrencyID:    product.GetCurrencyId(),
 		Rating:        product.GetRating(),
 		CategoryID:    product.GetCategoryId(),
