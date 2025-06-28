@@ -123,13 +123,14 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 }
 
 func (s *Service) Update(ctx context.Context, id string, d *dto.UpdateProductDTO) error {
-	var dm = make(map[string]interface{})
+	storageDTO := dao.NewUpdateProductStorageDTO(d)
+	var updateProductMap = make(map[string]interface{})
 
-	err := mapstructure.Decode(d, &dm)
+	err := mapstructure.Decode(storageDTO, &updateProductMap)
 	if err != nil {
 		return  errors.Wrap(err, "mapstructure.Decode UpdateProductDTO")
 	}
 
 	// Обновляем продукт в репозитории
-	return s.repository.Update(ctx, id, dm)
+	return s.repository.Update(ctx, id, updateProductMap)
 }

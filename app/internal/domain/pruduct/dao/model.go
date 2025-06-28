@@ -38,7 +38,6 @@ type CreateProductStorageDTO struct {
 
 // NewCreateProductStorageDTO создает DTO для создания продукта в хранилище
 func NewCreateProductStorageDTO(dto *dto.CreateProductDTO) *CreateProductStorageDTO {
-	now := time.Now().UTC().Format(time.RFC3339)
 	return &CreateProductStorageDTO{
 		ID:            uuid.New().String(),
 		Name:          dto.Name,
@@ -49,7 +48,34 @@ func NewCreateProductStorageDTO(dto *dto.CreateProductDTO) *CreateProductStorage
 		Rating:        dto.Rating,
 		CategoryID:    dto.CategoryID,
 		Specification: dto.Specification,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	}
+}
+ 
+type UpdateProductStorageDTO struct {
+	Name          *string `mapstructure:"name, omitempty"`
+	Description   *string `mapstructure:"description, omitempty"`
+	ImageID       *string `mapstructure:"image_id, omitempty"`
+	Price         *uint64 `mapstructure:"price, omitempty"`
+	CurrencyID    *uint32 `mapstructure:"currency_id, omitempty"`
+	Rating        *uint32 `mapstructure:"rating, omitempty"`
+	CategoryID    *uint32 `mapstructure:"category_id, omitempty"`
+	Specification map[string]interface{} `mapstructure:"specification, omitempty"`
+	UpdatedAt     string `mapstructure:"updated_at, omitempty"`
+}
+
+func NewUpdateProductStorageDTO(dto *dto.UpdateProductDTO) *UpdateProductStorageDTO {
+	
+	return &UpdateProductStorageDTO{
+		Name:          dto.Name,
+		Description:   dto.Description,
+		ImageID:       dto.ImageID,
+		Price:         dto.Price,
+		CurrencyID:    dto.CurrencyID,
+		Rating:        dto.Rating,
+		CategoryID:    dto.CategoryID,
+		Specification: dto.Specification,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	}
 }

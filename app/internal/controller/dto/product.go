@@ -38,14 +38,14 @@ func NewCreateProductDTOFromPB(product *pb_prod_products.CreateProductRequest) *
 }
 
 type UpdateProductDTO struct {
-	Name          *string `mapstructure:"name, omitempty"`
-	Description   *string `mapstructure:"description, omitempty"`
-	ImageID       *string `mapstructure:"image_id, omitempty"`
-	Price         *uint64 `mapstructure:"price, omitempty"`
-	CurrencyID    *uint32 `mapstructure:"currency_id, omitempty"`
-	Rating        *uint32 `mapstructure:"rating, omitempty"`
-	CategoryID    *uint32 `mapstructure:"category_id, omitempty"`
-	Specification map[string]interface{} `mapstructure:"specification, omitempty"`
+	Name          *string 
+	Description   *string 
+	ImageID       *string 
+	Price         *uint64 
+	CurrencyID    *uint32
+	Rating        *uint32
+	CategoryID    *uint32
+	Specification map[string]interface{} 
 }
 
 func NewUpdateProductDTOFromPB(product *pb_prod_products.UpdateProductRequest) *UpdateProductDTO {
