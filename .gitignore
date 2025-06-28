@@ -45,9 +45,15 @@ Thumbs.db
 !.env.example
 
 # Build artifacts
-/app/bin/
-/app/dist/
-/app/build/
+/bin/
+/dist/
+/build/
+
+# Built project executables
+/app/app
+/app/main
+app/bin/app
+app/build/app
 
 # Database files
 *.db
