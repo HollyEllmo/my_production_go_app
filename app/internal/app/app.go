@@ -14,9 +14,9 @@ import (
 	_ "github.com/HollyEllmo/my-first-go-project/docs"
 	"github.com/HollyEllmo/my-first-go-project/internal/config"
 	"github.com/HollyEllmo/my-first-go-project/internal/controller/grpc/v1/product"
+	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/dao"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/policy"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/service"
-	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/storage"
 	"github.com/HollyEllmo/my-first-go-project/pkg/client/postgresql"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	"github.com/HollyEllmo/my-first-go-project/pkg/metric"
@@ -60,7 +60,7 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	}
 
 	// Create the storage layer
-	productStorage := storage.NewProductStorage(pgClient)
+	productStorage := dao.NewProductStorage(pgClient)
 
 	// Create the service layer
 	productService := service.NewProductService(productStorage)
