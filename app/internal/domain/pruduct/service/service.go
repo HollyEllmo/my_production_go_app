@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/dao"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
@@ -10,42 +9,6 @@ import (
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
 	"github.com/HollyEllmo/my-first-go-project/pkg/errors"
 )
-
-// convertProductStorageToModel конвертирует ProductStorage в модель Product
-func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
-	var imageID *string
-	if ps.ImageID.Valid {
-		imageID = &ps.ImageID.String
-	}
-
-	var updatedAt *time.Time
-	if ps.UpdatedAt.Valid {
-		if parsed, err := time.Parse(time.RFC3339, ps.UpdatedAt.String); err == nil {
-			updatedAt = &parsed
-		}
-	}
-
-	createdAt := time.Now()
-	if ps.CreatedAt.Valid {
-		if parsed, err := time.Parse(time.RFC3339, ps.CreatedAt.String); err == nil {
-			createdAt = parsed
-		}
-	}
-
-	return &model.Product{
-		ID:            ps.ID,
-		Name:          ps.Name,
-		Description:   ps.Description,
-		ImageID:       imageID,
-		Price:         ps.Price,
-		CurrencyID:    ps.CurrencyID,
-		Rating:        ps.Rating,
-		CategoryID:    ps.CategoryID,
-		Specification: ps.Specification, // Оставляем как map[string]interface{}
-		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt,
-	}
-}
 
 type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
@@ -74,7 +37,7 @@ func (s *ProductService) All(ctx context.Context, filtering filter.Filterable, s
 	// Конвертируем []*dao.ProductStorage в []*model.Product
 	products := make([]*model.Product, len(dbProducts))
 	for i, ps := range dbProducts {
-		products[i] = convertProductStorageToModel(ps)
+		products[i] = model.NewProduct(ps)
 	}
 
 	return products, nil
@@ -100,7 +63,7 @@ func (s *ProductService) One(ctx context.Context, id string) (*model.Product, er
 		return nil, errors.Wrap(err, "repository.One")
 	}
 
-	product := convertProductStorageToModel(one)
+	product := model.NewProduct(one)
 	return product, nil
 }
 
@@ -116,3 +79,39 @@ func (s *ProductService) Update(ctx context.Context, product *model.Product) err
 	// Обновляем продукт в репозитории
 	return s.repository.Update(ctx, product.ID, toMap)
 }
+
+// convertProductStorageToModel конвертирует ProductStorage в модель Product
+// func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
+// 	var imageID *string
+// 	if ps.ImageID.Valid {
+// 		imageID = &ps.ImageID.String
+// 	}
+
+// 	var updatedAt *time.Time
+// 	if ps.UpdatedAt.Valid {
+// 		if parsed, err := time.Parse(time.RFC3339, ps.UpdatedAt.String); err == nil {
+// 			updatedAt = &parsed
+// 		}
+// 	}
+
+// 	createdAt := time.Now()
+// 	if ps.CreatedAt.Valid {
+// 		if parsed, err := time.Parse(time.RFC3339, ps.CreatedAt.String); err == nil {
+// 			createdAt = parsed
+// 		}
+// 	}
+
+// 	return &model.Product{
+// 		ID:            ps.ID,
+// 		Name:          ps.Name,
+// 		Description:   ps.Description,
+// 		ImageID:       imageID,
+// 		Price:         ps.Price,
+// 		CurrencyID:    ps.CurrencyID,
+// 		Rating:        ps.Rating,
+// 		CategoryID:    ps.CategoryID,
+// 		Specification: ps.Specification, // Оставляем как map[string]interface{}
+// 		CreatedAt:     createdAt,
+// 		UpdatedAt:     updatedAt,
+// 	}
+// }

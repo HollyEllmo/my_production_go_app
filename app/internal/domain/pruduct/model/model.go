@@ -6,32 +6,102 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/dao"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 	"github.com/google/uuid"
-	"github.com/mitchellh/mapstructure"
 )
 
 type Product struct {
-	ID            string 
-	Name          string 
-	Description   string 
-	ImageID       *string 
-	Price         uint64 
-	CurrencyID    uint32 
-	Rating        uint32 
-	CategoryID    uint32 
+	ID            string
+	Name          string
+	Description   string
+	ImageID       *string
+	Price         uint64
+	CurrencyID    uint32
+	Rating        uint32
+	CategoryID    uint32
 	Specification map[string]interface{}
-	CreatedAt     time.Time 
-	UpdatedAt     *time.Time  
+	CreatedAt     time.Time
+	UpdatedAt     *time.Time
 }
 
-func (p *Product) ToMap() (map[string]interface{}, error) {
-	var updateProductMap map[string]interface{}
-	err := mapstructure.Decode(p, &updateProductMap)
-	if err != nil {
-		return updateProductMap, fmt.Errorf("mapstructure.Decode(product): %w", err)
+func NewProduct(ps *dao.ProductStorage) *Product {
+	var imageID *string
+	if ps.ImageID.Valid {
+		imageID = &ps.ImageID.String
 	}
+
+	var updatedAt *time.Time
+	if ps.UpdatedAt.Valid {
+		parsedTime, err := time.Parse(time.RFC3339, ps.UpdatedAt.String)
+		if err != nil {
+			return nil
+		}
+		updatedAt = &parsedTime
+	}
+
+	createdAt := time.Now()
+	if ps.CreatedAt.Valid {
+		if parsed, err := time.Parse(time.RFC3339, ps.CreatedAt.String); err == nil {
+			createdAt = parsed
+		}
+	}
+
+	return &Product{
+		ID:            ps.ID,
+		Name:          ps.Name,
+		Description:   ps.Description,
+		ImageID:       imageID,
+		Price:         ps.Price,
+		CurrencyID:    ps.CurrencyID,
+		Rating:        ps.Rating,
+		CategoryID:    ps.CategoryID,
+		Specification: ps.Specification, // Оставляем как map[string]interface{}
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
+	}
+}
+
+
+func (p *Product) ToMap() (map[string]interface{}, error) {
+	updateProductMap := make(map[string]interface{})
+	
+	// Добавляем только непустые поля
+	if p.ID != "" {
+		updateProductMap["id"] = p.ID
+	}
+	if p.Name != "" {
+		updateProductMap["name"] = p.Name
+	}
+	if p.Description != "" {
+		updateProductMap["description"] = p.Description
+	}
+	if p.ImageID != nil {
+		updateProductMap["image_id"] = p.ImageID
+	}
+	if p.Price != 0 {
+		updateProductMap["price"] = p.Price
+	}
+	if p.CurrencyID != 0 {
+		updateProductMap["currency_id"] = p.CurrencyID
+	}
+	if p.Rating != 0 {
+		updateProductMap["rating"] = p.Rating
+	}
+	if p.CategoryID != 0 {
+		updateProductMap["category_id"] = p.CategoryID
+	}
+	if len(p.Specification) > 0 {
+		updateProductMap["specification"] = p.Specification
+	}
+	if !p.CreatedAt.IsZero() {
+		updateProductMap["created_at"] = p.CreatedAt
+	}
+	if p.UpdatedAt != nil {
+		updateProductMap["updated_at"] = *p.UpdatedAt
+	}
+	
 	return updateProductMap, nil
 }
 
@@ -58,7 +128,7 @@ func NewProductFromPB(productPB *pb_prod_products.CreateProductRequest) (*Produc
 
 
 func parseSpecification(specFromPB string) (spec map[string]interface{}, unmarshalErr error) {
-	if specFromPB != "" {
+	if specFromPB == "" {
 		return nil, errors.New("specification is empty")
    }
 
