@@ -2,16 +2,13 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
-	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/dao"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/filter"
 	"github.com/HollyEllmo/my-first-go-project/pkg/api/sort"
 	"github.com/HollyEllmo/my-first-go-project/pkg/errors"
-	"github.com/mitchellh/mapstructure"
 )
 
 // convertProductStorageToModel конвертирует ProductStorage в модель Product
@@ -35,24 +32,16 @@ func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
 		}
 	}
 
-	// Конвертируем specification из map в string
-	specificationStr := ""
-	if ps.Specification != nil {
-		if specBytes, err := json.Marshal(ps.Specification); err == nil {
-			specificationStr = string(specBytes)
-		}
-	}
-
 	return &model.Product{
 		ID:            ps.ID,
 		Name:          ps.Name,
 		Description:   ps.Description,
 		ImageID:       imageID,
-		Price:         ps.Price, // Преобразуем uint64 в string
+		Price:         ps.Price,
 		CurrencyID:    ps.CurrencyID,
 		Rating:        ps.Rating,
 		CategoryID:    ps.CategoryID,
-		Specification: specificationStr,
+		Specification: ps.Specification, // Оставляем как map[string]interface{}
 		CreatedAt:     createdAt,
 		UpdatedAt:     updatedAt,
 	}
@@ -61,22 +50,22 @@ func convertProductStorageToModel(ps *dao.ProductStorage) *model.Product {
 type repository interface {
 	All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*dao.ProductStorage, error)
 	One(ctx context.Context, id string) (*dao.ProductStorage, error)
-	Create(ctx context.Context, dto *dao.CreateProductStorageDTO) error
+	Create(ctx context.Context, m map[string]interface{}) error
 	Delete(ctx context.Context, id string) error
 	Update(ctx context.Context, id string, dm map[string]interface{}) error
 }
 
-type Service struct {
+type ProductService struct {
 	repository repository
 }
 
-func NewProductService(repository repository) *Service {
-	return &Service{
+func NewProductService(repository repository) *ProductService {
+	return &ProductService{
 		repository: repository,
 	}
 }
 
-func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error) {
+func (s *ProductService) All(ctx context.Context, filtering filter.Filterable, sorting sort.Sortable) ([]*model.Product, error) {
 	dbProducts, err := s.repository.All(ctx, filtering, sorting)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.All")
@@ -91,24 +80,21 @@ func (s *Service) All(ctx context.Context, filtering filter.Filterable, sorting 
 	return products, nil
 }
 
-func (s *Service) Create(ctx context.Context, d *dto.CreateProductDTO) (*model.Product, error) {
-	createProductStorageDTO := dao.NewCreateProductStorageDTO(d)
-	
-	err := s.repository.Create(ctx, createProductStorageDTO)
-	if err != nil {
-		return nil, err
-	}
-	one, err := s.repository.One(ctx, createProductStorageDTO.ID)
+func (s *ProductService) Create(ctx context.Context, product *model.Product) (*model.Product, error) {
+	toMap, err := product.ToMap()
 	if err != nil {
 		return nil, err
 	}
 
-	// Используем функцию convertProductStorageToModel для конвертации
-	product := convertProductStorageToModel(one)
+	err = s.repository.Create(ctx, toMap)
+	if err != nil {
+		return nil, err
+	}
+
 	return product, nil
 }
 
-func (s *Service) One(ctx context.Context, id string) (*model.Product, error) {
+func (s *ProductService) One(ctx context.Context, id string) (*model.Product, error) {
 	one, err := s.repository.One(ctx, id)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.One")
@@ -118,19 +104,15 @@ func (s *Service) One(ctx context.Context, id string) (*model.Product, error) {
 	return product, nil
 }
 
-func (s *Service) Delete(ctx context.Context, id string) error {
+func (s *ProductService) Delete(ctx context.Context, id string) error {
 	return s.repository.Delete(ctx, id)
 }
 
-func (s *Service) Update(ctx context.Context, id string, d *dto.UpdateProductDTO) error {
-	storageDTO := dao.NewUpdateProductStorageDTO(d)
-	var updateProductMap = make(map[string]interface{})
-
-	err := mapstructure.Decode(storageDTO, &updateProductMap)
+func (s *ProductService) Update(ctx context.Context, product *model.Product) error {
+   toMap, err := product.ToMap()
 	if err != nil {
-		return  errors.Wrap(err, "mapstructure.Decode UpdateProductDTO")
+		return  err
 	}
-
 	// Обновляем продукт в репозитории
-	return s.repository.Update(ctx, id, updateProductMap)
+	return s.repository.Update(ctx, product.ID, toMap)
 }

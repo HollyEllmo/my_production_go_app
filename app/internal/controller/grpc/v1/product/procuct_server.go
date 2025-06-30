@@ -3,12 +3,10 @@ package product
 import (
 	"context"
 
-	"github.com/HollyEllmo/my-first-go-project/internal/controller/dto"
 	"github.com/HollyEllmo/my-first-go-project/internal/domain/pruduct/model"
 	"github.com/HollyEllmo/my-first-go-project/pkg/logging"
 	pb_prod_products "github.com/HollyEllmo/my-proto-repo/gen/go/prod_service/products/v1"
 )
-
 
 
 func (s *Server) AllProducts(ctx context.Context, req *pb_prod_products.AllProductsRequest) (*pb_prod_products.AllProductsResponse, error) {
@@ -43,9 +41,14 @@ func (s *Server) ProductByID(ctx context.Context, req *pb_prod_products.ProductB
 }
 
 func (s *Server) UpdateProduct(ctx context.Context, req *pb_prod_products.UpdateProductRequest) (*pb_prod_products.UpdateProductResponse, error) {
-	d := dto.NewUpdateProductDTOFromPB(req)
-
-	err := s.policy.Update(ctx, req.Id, d)
+	product, err := s.policy.One(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	
+	product.UpdateFromPB(req)
+	
+	err = s.policy.Update(ctx, product)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +66,14 @@ func (s *Server) DeleteProduct(ctx context.Context, req *pb_prod_products.Delete
 }
 
 func (s *Server) CreateProduct(ctx context.Context, req *pb_prod_products.CreateProductRequest) (*pb_prod_products.CreateProductResponse, error) {
-	d := dto.NewCreateProductDTOFromPB(req)
+    pb, err := model.NewProductFromPB(req)
 
-	product, err := s.policy.CreateProduct(ctx, d)
+	if err != nil {
+		logging.WithError(ctx, err)
+		return nil, err
+	}
+
+	product, err := s.policy.CreateProduct(ctx, pb)
 	if err != nil {
 		return nil, err
 	}
